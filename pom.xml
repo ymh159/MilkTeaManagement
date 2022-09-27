@@ -15,6 +15,7 @@
     <module>Provider</module>
     <module>ProductCategory</module>
     <module>CommonModule</module>
+    <module>EventBusServices</module>
   </modules>
 
   <properties>

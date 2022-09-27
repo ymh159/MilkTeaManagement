@@ -23,4 +23,6 @@ public class Constants {
   public static final String MESSAGE_INSERT_FAIL = "Insert Fail";
   public static final String MESSAGE_DELETE_FAIL = "Delete Fail";
   public static final String MESSAGE_UPDATE_FAIL = "Update Fail";
+
+  // eventBus address
 }

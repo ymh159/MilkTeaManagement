@@ -8,11 +8,12 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="Order" />
+        <module name="EventBusServices" />
+        <module name="User" />
+        <module name="CommonModule" />
         <module name="ProductCategory" />
         <module name="Product" />
-        <module name="User" />
         <module name="Provider" />
-        <module name="CommonModule" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>

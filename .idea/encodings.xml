@@ -3,6 +3,8 @@
   <component name="Encoding">
     <file url="file://$PROJECT_DIR$/CommonModule/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/CommonModule/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/EventBusServices/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/EventBusServices/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Order/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Order/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/Product/src/main/java" charset="UTF-8" />
