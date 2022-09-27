@@ -11,10 +11,8 @@
         <module name="Product" />
         <module name="User" />
         <module name="Provider" />
+        <module name="Common" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="Order" target="1.5" />
-    </bytecodeTargetLevel>
   </component>
 </project>
