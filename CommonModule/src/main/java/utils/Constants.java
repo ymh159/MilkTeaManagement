@@ -25,4 +25,11 @@ public class Constants {
   public static final String MESSAGE_UPDATE_FAIL = "Update Fail";
 
   // eventBus address
+  public static final String ADDRESS_EB_GET_CUSTOMER =  "get.customer";
+  public static final String ADDRESS_EB_GET_ORDER_DETAIL =  "get.order_detail";
+  public static final String ADDRESS_EB_GET_ORDER =  "get.order";
+  public static final String ADDRESS_EB_GET_PRODUCT_CATEGORY =  "get.product_category";
+  public static final String ADDRESS_EB_GET_PRODUCT =  "get.product";
+  public static final String ADDRESS_EB_GET_PROVIDER =  "get.provider";
+  public static final String ADDRESS_EB_GET_USER =  "get.user";
 }

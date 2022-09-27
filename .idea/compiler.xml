@@ -12,6 +12,7 @@
         <module name="User" />
         <module name="CommonModule" />
         <module name="ProductCategory" />
+        <module name="HttpServer" />
         <module name="Product" />
         <module name="Provider" />
       </profile>

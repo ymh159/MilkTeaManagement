@@ -16,6 +16,7 @@
     <module>ProductCategory</module>
     <module>CommonModule</module>
     <module>EventBusServices</module>
+    <module>HttpServer</module>
   </modules>
 
   <properties>
