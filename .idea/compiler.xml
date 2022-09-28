@@ -7,17 +7,19 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="Order" />
-        <module name="EventBusServices" />
-        <module name="User" />
-        <module name="CommonModule" />
-        <module name="ProductCategory" />
-        <module name="HttpServer" />
-        <module name="Product" />
-        <module name="Provider" />
+        <module name="product" />
+        <module name="common" />
+        <module name="provider" />
+        <module name="http-server" />
+        <module name="user" />
+        <module name="product-category" />
+        <module name="order" />
+        <module name="customer" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
+      <module name="common-module" target="18" />
+      <module name="EventBusServices" target="18" />
       <module name="MilkTeaManagement" target="18" />
     </bytecodeTargetLevel>
   </component>
