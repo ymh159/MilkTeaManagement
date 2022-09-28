@@ -9,12 +9,14 @@
   <packaging>pom</packaging>
   <version>1.0-SNAPSHOT</version>
   <modules>
-    <module>User</module>
-    <module>Order</module>
-    <module>Product</module>
-    <module>Provider</module>
-    <module>ProductCategory</module>
-    <module>CommonModule</module>
+    <module>user</module>
+    <module>order</module>
+    <module>product</module>
+    <module>provider</module>
+    <module>product-category</module>
+    <module>common</module>
+    <module>http-server</module>
+    <module>customer</module>
   </modules>
 
   <properties>
