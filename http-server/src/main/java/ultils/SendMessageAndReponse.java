@@ -18,7 +18,7 @@ public class SendMessageAndReponse {
 
   public void send(RoutingContext routingContext, String address, Object message) {
     vertx.eventBus().send(address, message, reply -> {
-      LOGGER.info("eb-send address:{}, message:{}", address,
+      LOGGER.info(Constants.LOGGER_ADDRESS_AND_MESSAGE, address,
           message);
       if (reply.succeeded()) {
         routingContext.response()
