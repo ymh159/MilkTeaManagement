@@ -15,6 +15,6 @@ public class OrderDetailEntity {
   private String id;
   private String order_id;
   private String product_id;
-  private String product_value;
-  private String product_price;
+  private int product_value;
+  private int product_price;
 }

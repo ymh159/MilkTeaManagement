@@ -1,3 +1,4 @@
+import DTO.ProductDetailDTO;
 import entity.ProductEntity;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.eventbus.EventBus;
@@ -8,6 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import repositories.ProductRepositories;
 import repositories.impl.ProductRepositoriesImpl;
+import services.ProductServices;
+import services.impl.ProductServicesImpl;
 import utils.Constants;
 import utils.ConstantsAddress;
 
@@ -18,6 +21,7 @@ public class ProductVerticle extends AbstractVerticle {
   @Override
   public void start() throws Exception {
     ProductRepositories productRepositories = new ProductRepositoriesImpl(vertx);
+    ProductServices productServices = new ProductServicesImpl(vertx);
     EventBus eb = vertx.eventBus();
 
     // get product by id
@@ -91,6 +95,37 @@ public class ProductVerticle extends AbstractVerticle {
           message.reply(Constants.MESSAGE_DELETE_SUCCESS);
         } else {
           message.reply(Constants.MESSAGE_DELETE_FAIL);
+        }
+      });
+    });
+
+    // get product detail
+    eb.consumer(ConstantsAddress.ADDRESS_EB_GET_PRODUCT_DETAIL_BY_ID, message -> {
+      LOGGER.info(Constants.LOGGER_ADDRESS_AND_MESSAGE, ConstantsAddress.ADDRESS_EB_GET_PRODUCT_DETAIL_BY_ID,
+          message.body());
+      productServices.getProductDetailByID(message.body().toString()).setHandler(res -> {
+        if (res.succeeded()) {
+          ProductDetailDTO productDetailDTO = res.result();
+          JsonObject jsonObject = JsonObject.mapFrom(productDetailDTO);
+          message.reply(jsonObject);
+        } else {
+          message.reply(Constants.MESSAGE_GET_FAIL);
+        }
+      });
+    });
+
+    // get all product detail
+    eb.consumer(ConstantsAddress.ADDRESS_EB_GET_ALL_PRODUCT_DETAIL, message -> {
+      LOGGER.info(Constants.LOGGER_ADDRESS_AND_MESSAGE, ConstantsAddress.ADDRESS_EB_GET_ALL_PRODUCT_DETAIL,
+          message.body());
+      productServices.getAllProductDetail().setHandler(res -> {
+        if (res.succeeded()) {
+
+
+//          JsonObject jsonObject = JsonObject.mapFrom();
+//          message.reply(jsonObject);
+        } else {
+          message.reply(Constants.MESSAGE_GET_FAIL);
         }
       });
     });

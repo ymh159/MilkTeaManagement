@@ -33,6 +33,10 @@ public class VerticleRouter extends AbstractVerticle {
     router.route(Constants.PATH_USER + Constants.PATH_ID).handler(applicationHandlers::userHandler);
     router.route(Constants.PATH_USER + Constants.PATH_ID).handler(applicationHandlers::userHandler);
 
+    // path
+    router.route(Constants.PATH_GET_PRODUCT_DETAIL + Constants.PATH_ID).handler(applicationHandlers::getProductDetail);
+    router.route(Constants.PATH_GET_PRODUCT_DETAIL).handler(applicationHandlers::getAllProductDetail);
+
     return router;
   }
 }

@@ -13,7 +13,7 @@ public class ProviderEntity {
 
   @JsonProperty(Constants._ID)
   private String id;
-  private String name;
-  private String address;
-  private String email;
+  private String provider_name;
+  private String provider_address;
+  private String provider_email;
 }

@@ -17,17 +17,17 @@ public class SendMessageAndReponse {
   }
 
   public void send(RoutingContext routingContext, String address, Object message) {
-    vertx.eventBus().send(address, message, event -> {
+    vertx.eventBus().send(address, message, reply -> {
       LOGGER.info("eb-send address:{}, message:{}", address,
           message);
-      if (event.succeeded()) {
+      if (reply.succeeded()) {
         routingContext.response()
             .putHeader(Constants.CONTENT_TYPE, Constants.CONTENT_VALUE_JSON)
-            .end(Json.encodePrettily(event.result().body()));
+            .end(Json.encodePrettily(reply.result().body()));
       } else {
         routingContext.response()
             .putHeader(Constants.CONTENT_TYPE, Constants.CONTENT_VALUE_JSON)
-            .end(Json.encodePrettily(event.cause().getMessage()));
+            .end(Json.encodePrettily(reply.cause().getMessage()));
       }
     });
   }

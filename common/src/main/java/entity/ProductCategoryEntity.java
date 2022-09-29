@@ -13,8 +13,7 @@ public class ProductCategoryEntity {
 
   @JsonProperty(Constants._ID)
   private String id;
-  private String name;
+  private String category_name;
   private String brand;
   private String description;
-  private String provider_id;
 }

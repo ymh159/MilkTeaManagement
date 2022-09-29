@@ -51,9 +51,13 @@ public class ProductRepositoriesImpl implements ProductRepositories {
     mongoClient.findOne(Constants.COLLECTION_PRODUCT, new JsonObject().put(Constants._ID, id), null,
         res -> {
           if (res.succeeded()) {
-            ProductEntity productEntity = res.result().mapTo(ProductEntity.class);
-            LOGGER.info("findProductById:{}", productEntity);
-            future.complete(productEntity);
+            if(res.result()==null){
+              future.fail(new Exception("Id not fonud"));
+            }else {
+              ProductEntity productEntity = res.result().mapTo(ProductEntity.class);
+              LOGGER.info("findProductById:{}", productEntity);
+              future.complete(productEntity);
+            }
           } else {
             LOGGER.error("findProductById fail");
             future.fail(res.cause());

@@ -18,6 +18,8 @@ public class Constants {
 
   public static final String _ID = "_id";
   public static final String ID = "id";
+  public static final String PROVIDER_ID = "provider_id";
+  public static final String PRODUCT_CATEGORY_ID = "product_category_id";
   public static final String PATH_ID="/:id";
   public static final String BLANK = "";
   public static final String DOCUMENT_SET = "$set";
@@ -40,6 +42,7 @@ public class Constants {
   public static final String PATH_PRODUCT= "/api/product";
   public static final String PATH_PROVIDER= "/api/provider";
   public static final String PATH_USER= "/api/user";
+  public static final String PATH_GET_PRODUCT_DETAIL= "/api/product_detail";
 
   //content type
   public static final String CONTENT_TYPE = "content-type";

@@ -2,6 +2,10 @@ package utils;
 
 public class ConstantsAddress {
   // eventBus address
+
+
+  public static final String ADDRESS_EB_GET_PRODUCT_DETAIL_BY_ID = "get.product.detail.by.id";
+  public static final String ADDRESS_EB_GET_ALL_PRODUCT_DETAIL = "get.all.product.detail";
   public static final String ADDRESS_EB_GET_CUSTOMER =  "get.customer";
   public static final String ADDRESS_EB_GET_ORDER_DETAIL =  "get.order_detail";
   public static final String ADDRESS_EB_GET_ORDER =  "get.order";
