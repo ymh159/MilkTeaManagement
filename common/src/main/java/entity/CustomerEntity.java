@@ -13,6 +13,6 @@ public class CustomerEntity {
 
   @JsonProperty(Constants._ID)
   private String id;
-  private String name;
+  private String customer_name;
   private String phone;
 }

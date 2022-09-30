@@ -1,6 +1,7 @@
 package router.handlers;
 
 import io.vertx.core.Vertx;
+import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 import org.slf4j.Logger;
@@ -22,7 +23,38 @@ public class ApplicationHandlers {
   private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationHandlers.class);
 
   public void customerHandler(RoutingContext routingContext) {
+    String paramId = routingContext.request().getParam(Constants.ID);
+    routingContext.request().bodyHandler(handler -> {
+      String addressEvent = Constants.BLANK;
+      Object message = null;
 
+      switch (routingContext.request().method()) {
+        case GET -> {
+          if (paramId != null && paramId != Constants.BLANK) {
+            message = paramId;
+            addressEvent = ConstantsAddress.ADDRESS_EB_GET_CUSTOMER_BY_ID;
+          } else {
+            addressEvent = ConstantsAddress.ADDRESS_EB_GET_CUSTOMER;
+          }
+        }
+        case POST -> {
+          message = handler.toJsonObject();
+          addressEvent = ConstantsAddress.ADDRESS_EB_INSERT_CUSTOMER;
+        }
+        case PATCH -> {
+          JsonObject jsonObject = new JsonObject();
+          jsonObject.put(Constants._ID, paramId);
+          jsonObject.put(Constants.JSON_UPDATE, handler.toJsonObject());
+          message = jsonObject;
+          addressEvent = ConstantsAddress.ADDRESS_EB_UPDATE_CUSTOMER;
+        }
+        case DELETE -> {
+          message = paramId;
+          addressEvent = ConstantsAddress.ADDRESS_EB_DELETE_CUSTOMER;
+        }
+      }
+      sendMessageAndReponse.send(routingContext, addressEvent, message);
+    });
   }
 
   public void orderDetailHandler(RoutingContext routingContext) {
@@ -233,6 +265,25 @@ public class ApplicationHandlers {
       }
       sendMessageAndReponse.send(routingContext, addressEvent, message);
     });
+  }
+
+
+  public void getProductDetail(RoutingContext routingContext) {
+    String paramId = routingContext.request().getParam(Constants.ID);
+    if(paramId!=null && !paramId.isEmpty()){
+      sendMessageAndReponse.send(routingContext, ConstantsAddress.ADDRESS_EB_GET_PRODUCT_DETAIL_BY_ID,
+          paramId);
+    }else{
+      sendMessageAndReponse.send(routingContext, ConstantsAddress.ADDRESS_EB_GET_ALL_PRODUCT_DETAIL,null);
+    }
+  }
+  public void orderProduct(RoutingContext routingContext){
+    routingContext.request().bodyHandler(handler -> {
+      JsonObject jsonObject = handler.toJsonObject();
+      sendMessageAndReponse.send(routingContext, ConstantsAddress.ADDRESS_EB_ORDER_PRODUCT,
+          jsonObject);
+    });
+
   }
 }
 
