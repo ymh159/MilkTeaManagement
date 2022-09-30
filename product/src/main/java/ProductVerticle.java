@@ -4,6 +4,7 @@ import io.vertx.core.AbstractVerticle;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +44,7 @@ public class ProductVerticle extends AbstractVerticle {
     eb.consumer(ConstantsAddress.ADDRESS_EB_GET_PRODUCT, message -> {
       LOGGER.info(Constants.LOGGER_ADDRESS_AND_MESSAGE, ConstantsAddress.ADDRESS_EB_GET_PRODUCT,
           message.body());
-      productRepositories.getProducts().setHandler(res -> {
+      productServices.getAllProduct().setHandler(res -> {
         if (res.succeeded()) {
           List<ProductEntity> productEntityList = res.result();
           JsonArray jsonArray = new JsonArray(productEntityList);
@@ -115,15 +116,14 @@ public class ProductVerticle extends AbstractVerticle {
     });
 
     // get all product detail
-    eb.consumer(ConstantsAddress.ADDRESS_EB_GET_ALL_PRODUCT_DETAIL, message -> {
+    eb.consumer(ConstantsAddress.ADDRESS_EB_GET_ALL_PRODUCT_DETAIL, message ->{
       LOGGER.info(Constants.LOGGER_ADDRESS_AND_MESSAGE, ConstantsAddress.ADDRESS_EB_GET_ALL_PRODUCT_DETAIL,
           message.body());
       productServices.getAllProductDetail().setHandler(res -> {
         if (res.succeeded()) {
-
-
-//          JsonObject jsonObject = JsonObject.mapFrom();
-//          message.reply(jsonObject);
+          List<ProductDetailDTO> productDetailDTOList = res.result();
+          JsonArray jsonArray = new JsonArray(productDetailDTOList);
+          message.reply(jsonArray);
         } else {
           message.reply(Constants.MESSAGE_GET_FAIL);
         }

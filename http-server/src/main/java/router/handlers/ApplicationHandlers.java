@@ -1,6 +1,7 @@
 package router.handlers;
 
 import io.vertx.core.Vertx;
+import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 import org.slf4j.Logger;
@@ -266,14 +267,23 @@ public class ApplicationHandlers {
     });
   }
 
+
   public void getProductDetail(RoutingContext routingContext) {
     String paramId = routingContext.request().getParam(Constants.ID);
-    sendMessageAndReponse.send(routingContext, ConstantsAddress.ADDRESS_EB_GET_PRODUCT_DETAIL_BY_ID,
-        paramId);
+    if(paramId!=null && !paramId.isEmpty()){
+      sendMessageAndReponse.send(routingContext, ConstantsAddress.ADDRESS_EB_GET_PRODUCT_DETAIL_BY_ID,
+          paramId);
+    }else{
+      sendMessageAndReponse.send(routingContext, ConstantsAddress.ADDRESS_EB_GET_ALL_PRODUCT_DETAIL,null);
+    }
   }
+  public void orderProduct(RoutingContext routingContext){
+    routingContext.request().bodyHandler(handler -> {
+      JsonObject jsonObject = handler.toJsonObject();
+      sendMessageAndReponse.send(routingContext, ConstantsAddress.ADDRESS_EB_ORDER_PRODUCT,
+          jsonObject);
+    });
 
-  public void getAllProductDetail(RoutingContext routingContext) {
-    sendMessageAndReponse.send(routingContext, ConstantsAddress.ADDRESS_EB_GET_ALL_PRODUCT_DETAIL,ConstantsAddress.ADDRESS_EB_GET_ALL_PRODUCT_DETAIL);
   }
 }
 

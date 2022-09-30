@@ -13,6 +13,7 @@ public class ConstantsAddress {
   public static final String ADDRESS_EB_GET_PRODUCT =  "get.product";
   public static final String ADDRESS_EB_GET_PROVIDER =  "get.provider";
   public static final String ADDRESS_EB_GET_USER =  "get.user";
+  public static final String ADDRESS_EB_ORDER_PRODUCT =  "order.product";
 
   public static final String ADDRESS_EB_GET_CUSTOMER_BY_ID =  "get.customer.by.id";
   public static final String ADDRESS_EB_GET_ORDER_DETAIL_BY_ID =  "get.order_detail.by.id";

@@ -12,7 +12,7 @@ public class VerticleRouter extends AbstractVerticle {
   public Router getRouter(Vertx vertx) {
     ApplicationHandlers applicationHandlers = new ApplicationHandlers(vertx);
     Router router = Router.router(vertx);
-    // =
+    //
     router.route(Constants.PATH_CUSTOMER).handler(applicationHandlers::customerHandler);
     router.route(Constants.PATH_ORDER_DETAIL).handler(applicationHandlers::orderDetailHandler);
     router.route(Constants.PATH_ORDER).handler(applicationHandlers::orderHandler);
@@ -31,11 +31,11 @@ public class VerticleRouter extends AbstractVerticle {
     router.route(Constants.PATH_PRODUCT + Constants.PATH_ID).handler(applicationHandlers::productHandler);
     router.route(Constants.PATH_PROVIDER + Constants.PATH_ID).handler(applicationHandlers::providerHandler);
     router.route(Constants.PATH_USER + Constants.PATH_ID).handler(applicationHandlers::userHandler);
-    router.route(Constants.PATH_USER + Constants.PATH_ID).handler(applicationHandlers::userHandler);
 
     // path
     router.route(Constants.PATH_GET_PRODUCT_DETAIL + Constants.PATH_ID).handler(applicationHandlers::getProductDetail);
-    router.route(Constants.PATH_GET_PRODUCT_DETAIL).handler(applicationHandlers::getAllProductDetail);
+    router.route(Constants.PATH_GET_PRODUCT_DETAIL).handler(applicationHandlers::getProductDetail);
+    router.route(Constants.PATH_ORDER_PRODUCT).handler(applicationHandlers::orderProduct);
 
     return router;
   }

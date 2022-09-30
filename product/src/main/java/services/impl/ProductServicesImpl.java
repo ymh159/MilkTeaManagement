@@ -12,6 +12,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.mongo.MongoClient;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import jdk.jfr.Category;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,73 +26,73 @@ import utils.MongoDBClient;
 public class ProductServicesImpl implements ProductServices {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ProductServicesImpl.class);
-  private static MongoClient mongoClient;
   private ProductRepositories repositories;
 
   private Vertx vertx;
 
   public ProductServicesImpl(Vertx vertx) {
-    mongoClient = MongoDBClient.client(vertx);
     repositories = new ProductRepositoriesImpl(vertx);
     this.vertx = vertx;
   }
 
   @Override
   public Future<List<ProductDetailDTO>> getAllProductDetail() {
-    Future<List<ProductDetailDTO>> future = Future.future();
-    getAllProduct().setHandler(res -> {
-      if (res.succeeded()) {
-        List<ProductEntity> productEntityList = res.result();
-        List<ProductDetailDTO> productDetailDTOList = new ArrayList<>();
-        for (ProductEntity entity : productEntityList) {
-          Future<ProductDetailDTO> futureProductDetail = Future.future();
-          Future<ProductEntity> futureProduct = Future.future();
-          Future<JsonObject> futureCategory = Future.future();
-          Future<JsonObject> futureProvider = Future.future();
+    return getAllProduct().compose(resProduct -> {
+      Future<List<ProductDetailDTO>> future = Future.future();
+      List<Future<ProductDetailDTO>> collect = resProduct.stream().map(
+          productEntity -> {
+            Future<JsonObject> futureCategory = sendAndReplyJsonObject(
+                productEntity.getProduct_category_id(),
+                ConstantsAddress.ADDRESS_EB_GET_PRODUCT_CATEGORY_BY_ID);
+            Future<JsonObject> futureProvider = sendAndReplyJsonObject(
+                productEntity.getProvider_id(),
+                ConstantsAddress.ADDRESS_EB_GET_PROVIDER_BY_ID);
 
-          vertx.eventBus().send(ConstantsAddress.ADDRESS_EB_GET_PRODUCT_CATEGORY_BY_ID,
-              entity.getProduct_category_id(), resCategory -> {
-                if (resCategory.succeeded()) {
-                  JsonObject jsonCategory = JsonObject.mapFrom(resCategory.result().body());
-                  jsonCategory.remove(Constants._ID);
-                  futureCategory.complete(jsonCategory);
-                } else {
-                  future.fail(resCategory.cause());
-                }
-              });
+            Future<ProductDetailDTO> productDetailDTOFuture = Future.future();
+            CompositeFuture all = CompositeFuture.all(futureCategory, futureProvider);
+            all.setHandler(ar -> {
+              if (ar.succeeded()) {
+                JsonObject catJo = all.resultAt(0);
+                JsonObject proJo = all.resultAt(1);
+                JsonObject jsonProduct = JsonObject.mapFrom(productEntity);
+                JsonObject jsonProductDetail = jsonProduct.mergeIn(jsonProduct)
+                    .mergeIn(catJo)
+                    .mergeIn(proJo);
+                ProductDetailDTO productDetailDTO = jsonProductDetail.mapTo(ProductDetailDTO.class);
+                productDetailDTOFuture.complete(productDetailDTO);
+              } else {
+                productDetailDTOFuture.fail(ar.cause());
+              }
+            });
 
-          vertx.eventBus()
-              .send(ConstantsAddress.ADDRESS_EB_GET_PROVIDER_BY_ID, entity.getProvider_id(),
-                  resProvider -> {
-                    if (resProvider.succeeded()) {
-                      JsonObject jsonProvider = JsonObject.mapFrom(resProvider.result().body());
-                      jsonProvider.remove(Constants._ID);
-                      futureProvider.complete(jsonProvider);
-                    } else {
-                      future.fail(resProvider.cause());
-                    }
-                  });
-          CompositeFuture.all(futureProduct, futureCategory, futureProvider).setHandler(event -> {
-            if (event.succeeded()) {
-              JsonObject jsonProduct = JsonObject.mapFrom(futureProduct.result());
-              jsonProduct.remove(Constants.PRODUCT_CATEGORY_ID);
-              jsonProduct.remove(Constants.PROVIDER_ID);
-              JsonObject jsonProductDetail = jsonProduct.mergeIn(jsonProduct)
-                  .mergeIn(futureCategory.result()).mergeIn(futureProvider.result());
-              ProductDetailDTO productDetailDTO = jsonProductDetail.mapTo(ProductDetailDTO.class);
-              futureProductDetail.complete(productDetailDTO);
+            return productDetailDTOFuture;
+          }).collect(Collectors.toList());
+      CompositeFuture.all(new ArrayList<>(collect))
+          .setHandler(hl -> {
+            if (hl.succeeded()) {
+              List<ProductDetailDTO> collect1 = hl.result().list().stream()
+                  .map(ent -> (ProductDetailDTO) ent).collect(Collectors.toList());
+              future.complete(collect1);
             } else {
-              futureProductDetail.fail(event.cause());
+              future.fail(hl.cause());
             }
           });
-          productDetailDTOList.add(futureProductDetail.result());
-        }
-        future.complete(productDetailDTOList);
+      return future;
+    });
+  }
+
+
+  private Future<JsonObject> sendAndReplyJsonObject(String id, String address) {
+    Future<JsonObject> jsonObjectFuture = Future.future();
+    vertx.eventBus().send(address, id, reply -> {
+      if (reply.succeeded()) {
+        JsonObject jsonCategory = JsonObject.mapFrom(reply.result().body());
+        jsonObjectFuture.complete(jsonCategory);
       } else {
-        future.fail(res.cause());
+        jsonObjectFuture.fail(reply.cause());
       }
     });
-    return future;
+    return jsonObjectFuture;
   }
 
   @Override
@@ -112,7 +113,7 @@ public class ProductServicesImpl implements ProductServices {
                 jsonCategory.remove(Constants._ID);
                 futureCategory.complete(jsonCategory);
               } else {
-                future.fail(resCategory.cause());
+                futureCategory.fail(resCategory.cause());
               }
             });
 
@@ -124,27 +125,26 @@ public class ProductServicesImpl implements ProductServices {
                     jsonProvider.remove(Constants._ID);
                     futureProvider.complete(jsonProvider);
                   } else {
-                    future.fail(resProvider.cause());
+                    futureProvider.fail(resProvider.cause());
                   }
                 });
       } else {
         futureProduct.fail(res.cause());
       }
-    });
 
-    CompositeFuture.all(futureProduct, futureCategory, futureProvider).setHandler(event -> {
-      if (event.succeeded()) {
-        JsonObject jsonProduct = JsonObject.mapFrom(futureProduct.result());
-        jsonProduct.remove(Constants.PRODUCT_CATEGORY_ID);
-        jsonProduct.remove(Constants.PROVIDER_ID);
-        JsonObject jsonProductDetail = jsonProduct.mergeIn(jsonProduct)
-            .mergeIn(futureCategory.result()).mergeIn(futureProvider.result());
-        ProductDetailDTO productDetailDTO = jsonProductDetail.mapTo(ProductDetailDTO.class);
-
-        future.complete(productDetailDTO);
-      } else {
-        future.fail(event.cause());
-      }
+      CompositeFuture.all(futureProduct, futureCategory, futureProvider).setHandler(event -> {
+        if (event.succeeded()) {
+          JsonObject jsonProduct = JsonObject.mapFrom(futureProduct.result());
+          jsonProduct.remove(Constants.PRODUCT_CATEGORY_ID);
+          jsonProduct.remove(Constants.PROVIDER_ID);
+          JsonObject jsonProductDetail = jsonProduct.mergeIn(jsonProduct)
+              .mergeIn(futureCategory.result()).mergeIn(futureProvider.result());
+          ProductDetailDTO productDetailDTO = jsonProductDetail.mapTo(ProductDetailDTO.class);
+          future.complete(productDetailDTO);
+        } else {
+          future.fail(event.cause());
+        }
+      });
     });
     return future;
   }
