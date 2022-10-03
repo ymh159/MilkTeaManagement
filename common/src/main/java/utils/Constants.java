@@ -16,10 +16,18 @@ public class Constants {
   public static final String COLLECTION_PROVIDER = "provider";
   public static final String COLLECTION_USER = "user";
 
-
+  // Property
   public static final String _ID = "_id";
   public static final String ID = "id";
   public static final String PROVIDER_ID = "provider_id";
+  public static final String DATE_ORDER = "date_order";
+  public static final String ORDER_ID = "order_id";
+  public static final String USER_ID = "user_id";
+  public static final String CUSTOMER_ID = "customer_id";
+  public static final String TOTAL_VALUE = "total_value";
+  public static final String TOTAL_PRICE = "total_price";
+
+
   public static final String PRODUCT_CATEGORY_ID = "product_category_id";
   public static final String PATH_ID = "/:id";
   public static final String BLANK = "";
@@ -38,6 +46,7 @@ public class Constants {
   // path
   public static final String PATH_CUSTOMER = "/api/customer";
   public static final String PATH_ORDER_DETAIL = "/api/order_detail";
+  public static final String PATH_FIND_ORDER_DETAIL_BY_ORDER_ID = "/api/order_detail/order_id/:order_id";
   public static final String PATH_ORDER = "/api/order";
   public static final String PATH_PRODUCT_CATEGORY = "/api/product_category";
   public static final String PATH_PRODUCT = "/api/product";
@@ -50,4 +59,6 @@ public class Constants {
   public static final String CONTENT_TYPE = "content-type";
   public static final String CONTENT_VALUE_JSON = "application/json ; charset=utf-8";
   public static final String LOGGER_ADDRESS_AND_MESSAGE = "eb-address: {}, message: {}";
+
+  public static final String FORMAT_DATE_JSON= "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
 }

@@ -64,18 +64,19 @@ public class OrderRepositoriesImpl implements OrderRepositories {
   }
 
   @Override
-  public Future<Void> insertOrder(OrderEntity orderEntity) {
-    Future<Void> future = Future.future();
+  public Future<String> insertOrder(OrderEntity orderEntity) {
+    Future<String> future = Future.future();
     orderEntity.setId(ObjectId.get().toHexString());
     JsonObject query = JsonObject.mapFrom(orderEntity);
+    //query.put(Constants.DATE_ORDER, new JsonObject().put("$date",query.getValue(Constants.DATE_ORDER)));
 
     mongoClient.insert(Constants.COLLECTION_ORDER, query, event -> {
       if (event.succeeded()) {
-        future.complete();
+        future.complete(orderEntity.getId());
         LOGGER.info("insertOrder:{}", query);
       } else {
         future.fail(event.cause());
-        LOGGER.info(Constants.MESSAGE_INSERT_FAIL + " query:{}", query);
+        LOGGER.info(Constants.MESSAGE_INSERT_FAIL + " insertOrder:{}", query);
       }
     });
 

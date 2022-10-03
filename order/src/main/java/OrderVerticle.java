@@ -1,3 +1,4 @@
+import DTO.OrderInfoDTO;
 import entity.OrderDetailEntity;
 import entity.OrderEntity;
 import io.vertx.core.AbstractVerticle;
@@ -12,6 +13,8 @@ import repositories.OrderDetailRepositories;
 import repositories.OrderRepositories;
 import repositories.impl.OrderDetailRepositoriesImpl;
 import repositories.impl.OrderRepositoriesImpl;
+import services.OrderProductSevices;
+import services.impl.OrderProductSevicesImpl;
 import utils.Constants;
 import utils.ConstantsAddress;
 
@@ -23,8 +26,41 @@ public class OrderVerticle extends AbstractVerticle {
   public void start() throws Exception {
     eventBusOrder(vertx);
     eventBusOrderDetail(vertx);
+    eventBusOrderProduct(vertx);
   }
 
+  public void eventBusOrderProduct(Vertx vertx){
+    OrderProductSevices orderProductSevices = new OrderProductSevicesImpl(vertx);
+    EventBus eb = vertx.eventBus();
+
+    // get order product detail
+    eb.consumer(ConstantsAddress.ADDRESS_EB_GET_ORDER_PRODUCT_DETAIL, message -> {
+      LOGGER.info(Constants.LOGGER_ADDRESS_AND_MESSAGE, ConstantsAddress.ADDRESS_EB_GET_ORDER_DETAIL,
+          message.body());
+      orderProductSevices.getOrderProductDetail(message.body().toString()).setHandler(res -> {
+        if (res.succeeded()) {
+          JsonObject jsonObject = JsonObject.mapFrom(res.result());
+          message.reply(jsonObject);
+        } else {
+          message.reply(Constants.MESSAGE_GET_FAIL);
+        }
+      });
+    });
+
+    eb.consumer(ConstantsAddress.ADDRESS_EB_ORDER_PRODUCT, message ->{
+      LOGGER.info(Constants.LOGGER_ADDRESS_AND_MESSAGE, ConstantsAddress.ADDRESS_EB_ORDER_PRODUCT,
+          message.body());
+      JsonObject jsonObject = JsonObject.mapFrom(message.body());
+      OrderInfoDTO orderInfoDTO = jsonObject.mapTo(OrderInfoDTO.class);
+      orderProductSevices.orderProduct(orderInfoDTO).setHandler(res ->{
+        if (res.succeeded()) {
+          message.reply(Constants.MESSAGE_INSERT_SUCCESS);
+        } else {
+          message.reply(Constants.MESSAGE_INSERT_FAIL);
+        }
+      });
+    });
+  }
   public void eventBusOrder(Vertx vertx){
     OrderRepositories orderRepositories = new OrderRepositoriesImpl(vertx);
     EventBus eb = vertx.eventBus();
@@ -107,6 +143,7 @@ public class OrderVerticle extends AbstractVerticle {
 
   public void eventBusOrderDetail(Vertx vertx){
     OrderDetailRepositories orderDetailRepositories = new OrderDetailRepositoriesImpl(vertx);
+    OrderProductSevices orderProductSevices = new OrderProductSevicesImpl(vertx);
     EventBus eb = vertx.eventBus();
 
     // get orderDetail by id
@@ -118,6 +155,21 @@ public class OrderVerticle extends AbstractVerticle {
           OrderDetailEntity orderDetailEntity = res.result();
           JsonObject jsonObject = JsonObject.mapFrom(orderDetailEntity);
           message.reply(jsonObject);
+        } else {
+          message.reply(Constants.MESSAGE_GET_FAIL);
+        }
+      });
+    });
+
+    // get orderDetail by order_id
+    eb.consumer(ConstantsAddress.ADDRESS_EB_GET_ORDER_DETAIL_BY_ORDER_ID, message -> {
+      LOGGER.info(Constants.LOGGER_ADDRESS_AND_MESSAGE, ConstantsAddress.ADDRESS_EB_GET_ORDER_DETAIL_BY_ORDER_ID,
+          message.body());
+      orderProductSevices.findOrderDetailByOrderId(message.body().toString()).setHandler(res -> {
+        if (res.succeeded()) {
+          List<OrderDetailEntity> orderDetailEntityList = res.result();
+          JsonArray jsonArray =  new JsonArray(orderDetailEntityList);
+          message.reply(jsonArray);
         } else {
           message.reply(Constants.MESSAGE_GET_FAIL);
         }
