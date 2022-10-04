@@ -19,7 +19,7 @@ public class CustomerRepositoriesImpl implements CustomerRepositories {
   private static final Logger LOGGER = LoggerFactory.getLogger(CustomerRepositoriesImpl.class);
   private static MongoClient mongoClient;
 
-  public CustomerRepositoriesImpl(Vertx vertx){
+  public CustomerRepositoriesImpl(Vertx vertx) {
     mongoClient = MongoDBClient.client(vertx);
   }
 
@@ -82,16 +82,16 @@ public class CustomerRepositoriesImpl implements CustomerRepositories {
   }
 
   @Override
-  public Future<CustomerEntity> updateCustomer(String id, CustomerEntity customerEntity) {
-    Future<CustomerEntity> future = Future.future();
+  public Future<Void> updateCustomer(String id, CustomerEntity customerEntity) {
+    Future<Void> future = Future.future();
     JsonObject jsonUpdate = JsonObject.mapFrom(customerEntity);
     JsonObject query = new JsonObject().put(Constants._ID,id);
     jsonUpdate.getMap().values().removeIf(Objects::isNull);
     JsonObject jsonQueryUpdate = new JsonObject().put(Constants.DOCUMENT_SET,jsonUpdate);
 
-    mongoClient.findOneAndUpdate(Constants.COLLECTION_CUSTOMER, query, jsonQueryUpdate, event -> {
+    mongoClient.updateCollection(Constants.COLLECTION_CUSTOMER, query, jsonQueryUpdate, event -> {
       if (event.succeeded()) {
-        future.complete(event.result().mapTo(CustomerEntity.class));
+        future.complete();
         LOGGER.info("updateCustomer:{}", query);
       } else {
         future.fail(event.cause());

@@ -185,7 +185,7 @@ public class ApplicationHandlers {
           JsonObject jsonObject = new JsonObject();
           jsonObject.put(Constants._ID, paramId);
           jsonObject.put(Constants.JSON_UPDATE, handler.toJsonObject());
-          message = handler.toJsonObject();
+          message = jsonObject;
           addressEvent = ConstantsAddress.ADDRESS_EB_UPDATE_PRODUCT;
         }
         case DELETE -> {
@@ -270,39 +270,21 @@ public class ApplicationHandlers {
 
   public void getProductDetail(RoutingContext routingContext) {
     String paramId = routingContext.request().getParam(Constants.ID);
-    if (paramId != null && !paramId.isEmpty()) {
-      sendMessageAndReponse.send(routingContext,
-          ConstantsAddress.ADDRESS_EB_GET_PRODUCT_DETAIL_BY_ID,
+    if(paramId!=null && !paramId.isEmpty()){
+      sendMessageAndReponse.send(routingContext, ConstantsAddress.ADDRESS_EB_GET_PRODUCT_DETAIL_BY_ID,
           paramId);
-    } else {
-      sendMessageAndReponse.send(routingContext, ConstantsAddress.ADDRESS_EB_GET_ALL_PRODUCT_DETAIL,
-          null);
+    }else{
+      sendMessageAndReponse.send(routingContext, ConstantsAddress.ADDRESS_EB_GET_ALL_PRODUCT_DETAIL,null);
     }
   }
+  public void orderProduct(RoutingContext routingContext){
+    routingContext.request().bodyHandler(handler -> {
+      JsonObject jsonObject = handler.toJsonObject();
+      sendMessageAndReponse.send(routingContext, ConstantsAddress.ADDRESS_EB_ORDER_PRODUCT,
+          jsonObject);
+    });
 
-  public void orderProduct(RoutingContext routingContext) {
-    switch (routingContext.request().method()) {
-      case GET -> {
-        String id = routingContext.request().getParam(Constants.ID);
-        sendMessageAndReponse.send(routingContext,
-            ConstantsAddress.ADDRESS_EB_GET_ORDER_PRODUCT_DETAIL, id);
-      }
-      case POST -> {
-        routingContext.request().bodyHandler(handler -> {
-          JsonObject jsonObject = handler.toJsonObject();
-          sendMessageAndReponse.send(routingContext, ConstantsAddress.ADDRESS_EB_ORDER_PRODUCT,
-              jsonObject);
-        });
-      }
-    }
   }
-
-  public void findOrderDetailByOrderId(RoutingContext routingContext) {
-    sendMessageAndReponse.send(routingContext,
-        ConstantsAddress.ADDRESS_EB_GET_ORDER_DETAIL_BY_ORDER_ID,
-        routingContext.pathParam(Constants.ORDER_ID));
-  }
-
 }
 
 

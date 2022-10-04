@@ -10,7 +10,7 @@ public interface OrderRepositories {
 
   Future<OrderEntity> findOrderById(String id);
 
-  Future<String> insertOrder(OrderEntity orderEntity);
+  Future<Void> insertOrder(OrderEntity orderEntity);
 
   Future<Void> updateOrder(String id, OrderEntity orderEntity);
 

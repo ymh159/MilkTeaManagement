@@ -1,11 +1,11 @@
-import java.io.FileNotFoundException;
-import utils.ClusterDeloyVerticle;
+import io.vertx.core.AbstractVerticle;
+import utils.DeloyVerticle;
 
 
 public class UserMain {
 
   public static void main(String[] args) {
-    ClusterDeloyVerticle clusterDeloyVerticle = new ClusterDeloyVerticle();
-    clusterDeloyVerticle.deloyVerticleCommon(UserVerticle.class);
+    DeloyVerticle deloyVerticle = new DeloyVerticle();
+    deloyVerticle.deloyVerticleCommon(UserVerticle.class);
   }
 }

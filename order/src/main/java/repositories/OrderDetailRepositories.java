@@ -15,5 +15,4 @@ public interface OrderDetailRepositories {
   Future<Void> updateOrderDetail(String id, OrderDetailEntity orderDetail);
 
   Future<Void> deleteOrderDetail(String id);
-  Future<List<OrderDetailEntity>> findOrderDetailByOrderId(String order_id);
 }

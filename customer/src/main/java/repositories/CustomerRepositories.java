@@ -12,7 +12,7 @@ public interface CustomerRepositories {
 
   Future<Void> insertCustomer(CustomerEntity customerEntity);
 
-  Future<CustomerEntity> updateCustomer(String id, CustomerEntity customerEntity);
+  Future<Void> updateCustomer(String id, CustomerEntity customerEntity);
 
   Future<Void> deleteCustomer(String id);
 }

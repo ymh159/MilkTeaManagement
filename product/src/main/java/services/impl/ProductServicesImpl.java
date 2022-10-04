@@ -1,14 +1,19 @@
 package services.impl;
 
 import DTO.ProductDetailDTO;
+import entity.ProductCategoryEntity;
 import entity.ProductEntity;
+import entity.ProviderEntity;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
+import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.mongo.MongoClient;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import jdk.jfr.Category;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import repositories.ProductRepositories;
@@ -16,13 +21,14 @@ import repositories.impl.ProductRepositoriesImpl;
 import services.ProductServices;
 import utils.Constants;
 import utils.ConstantsAddress;
+import utils.MongoDBClient;
 
 public class ProductServicesImpl implements ProductServices {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ProductServicesImpl.class);
-  private final ProductRepositories repositories;
+  private ProductRepositories repositories;
 
-  private final Vertx vertx;
+  private Vertx vertx;
 
   public ProductServicesImpl(Vertx vertx) {
     repositories = new ProductRepositoriesImpl(vertx);
@@ -60,7 +66,7 @@ public class ProductServicesImpl implements ProductServices {
             });
 
             return productDetailDTOFuture;
-          }).toList();
+          }).collect(Collectors.toList());
       CompositeFuture.all(new ArrayList<>(collect))
           .setHandler(hl -> {
             if (hl.succeeded()) {

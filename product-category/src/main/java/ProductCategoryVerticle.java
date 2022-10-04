@@ -1,5 +1,4 @@
 import entity.ProductCategoryEntity;
-import entity.TypeValueReply;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonArray;
@@ -11,7 +10,6 @@ import repositories.ProductCategoryRepositories;
 import repositories.impl.ProductCategoryRepositoriesImpl;
 import utils.Constants;
 import utils.ConstantsAddress;
-import utils.ReplyMessageEB;
 
 public class ProductCategoryVerticle extends AbstractVerticle {
 
@@ -19,71 +17,82 @@ public class ProductCategoryVerticle extends AbstractVerticle {
 
   @Override
   public void start() throws Exception {
-    ProductCategoryRepositories productCategoryRepositories = new ProductCategoryRepositoriesImpl(
-        vertx);
+    ProductCategoryRepositories productCategoryRepositories = new ProductCategoryRepositoriesImpl(vertx);
     EventBus eb = vertx.eventBus();
-    ReplyMessageEB replyMessageEB = new ReplyMessageEB();
 
     // get productCategory by id
     eb.consumer(ConstantsAddress.ADDRESS_EB_GET_PRODUCT_CATEGORY_BY_ID, message -> {
-      LOGGER.info(Constants.LOGGER_ADDRESS_AND_MESSAGE,
-          ConstantsAddress.ADDRESS_EB_GET_PRODUCT_CATEGORY_BY_ID,
+      LOGGER.info(Constants.LOGGER_ADDRESS_AND_MESSAGE, ConstantsAddress.ADDRESS_EB_GET_PRODUCT_CATEGORY_BY_ID,
           message.body());
-      productCategoryRepositories.findProductCategoryById(message.body().toString())
-          .setHandler(res -> {
-            replyMessageEB.replyMessage(message, res, TypeValueReply.JSON_OBJECT);
-          });
+      productCategoryRepositories.findProductCategoryById(message.body().toString()).setHandler(res -> {
+        if (res.succeeded()) {
+          ProductCategoryEntity productCategoryEntity = res.result();
+          JsonObject jsonObject = JsonObject.mapFrom(productCategoryEntity);
+          message.reply(jsonObject);
+        } else {
+          message.reply(Constants.MESSAGE_GET_FAIL);
+        }
+      });
     });
 
     // get all productCategory
     eb.consumer(ConstantsAddress.ADDRESS_EB_GET_PRODUCT_CATEGORY, message -> {
-      LOGGER.info(Constants.LOGGER_ADDRESS_AND_MESSAGE,
-          ConstantsAddress.ADDRESS_EB_GET_PRODUCT_CATEGORY,
+      LOGGER.info(Constants.LOGGER_ADDRESS_AND_MESSAGE, ConstantsAddress.ADDRESS_EB_GET_PRODUCT_CATEGORY,
           message.body());
       productCategoryRepositories.getProductCategorys().setHandler(res -> {
-        replyMessageEB.replyMessage(message, res, TypeValueReply.JSON_ARRAY);
+        if (res.succeeded()) {
+          List<ProductCategoryEntity> productCategoryEntityList = res.result();
+          JsonArray jsonArray = new JsonArray(productCategoryEntityList);
+          message.reply(jsonArray);
+        } else {
+          message.reply(Constants.MESSAGE_GET_FAIL);
+        }
       });
     });
 
     // insert productCategory
     eb.consumer(ConstantsAddress.ADDRESS_EB_INSERT_PRODUCT_CATEGORY, message -> {
-      LOGGER.info(Constants.LOGGER_ADDRESS_AND_MESSAGE,
-          ConstantsAddress.ADDRESS_EB_INSERT_PRODUCT_CATEGORY,
+      LOGGER.info(Constants.LOGGER_ADDRESS_AND_MESSAGE, ConstantsAddress.ADDRESS_EB_INSERT_PRODUCT_CATEGORY,
           message.body());
       JsonObject json = JsonObject.mapFrom(message.body());
       ProductCategoryEntity productCategoryEntity = json.mapTo(ProductCategoryEntity.class);
       productCategoryRepositories.insertProductCategory(productCategoryEntity).setHandler(res -> {
-        replyMessageEB.replyMessage(message, res, TypeValueReply.JSON_OBJECT,
-            Constants.MESSAGE_INSERT_SUCCESS);
+        if (res.succeeded()) {
+          message.reply(Constants.MESSAGE_INSERT_SUCCESS);
+        } else {
+          message.reply(Constants.MESSAGE_INSERT_FAIL);
+        }
       });
     });
 
     // update productCategory
     eb.consumer(ConstantsAddress.ADDRESS_EB_UPDATE_PRODUCT_CATEGORY, message -> {
-      LOGGER.info(Constants.LOGGER_ADDRESS_AND_MESSAGE,
-          ConstantsAddress.ADDRESS_EB_UPDATE_PRODUCT_CATEGORY,
+      LOGGER.info(Constants.LOGGER_ADDRESS_AND_MESSAGE, ConstantsAddress.ADDRESS_EB_UPDATE_PRODUCT_CATEGORY,
           message.body());
       JsonObject json = JsonObject.mapFrom(message.body());
       JsonObject jsonUpdate = JsonObject.mapFrom(json.getValue(Constants.JSON_UPDATE));
       ProductCategoryEntity productCategoryEntity = jsonUpdate.mapTo(ProductCategoryEntity.class);
-      productCategoryRepositories.updateProductCategory(json.getValue(Constants._ID).toString(),
-              productCategoryEntity)
+      productCategoryRepositories.updateProductCategory(json.getValue(Constants._ID).toString(), productCategoryEntity)
           .setHandler(res -> {
-            replyMessageEB.replyMessage(message, res, TypeValueReply.JSON_OBJECT,
-                Constants.MESSAGE_UPDATE_SUCCESS);
+            if (res.succeeded()) {
+              message.reply(Constants.MESSAGE_UPDATE_SUCCESS);
+            } else {
+              message.reply(Constants.MESSAGE_UPDATE_FAIL);
+            }
           });
     });
 
     // delete productCategory
     eb.consumer(ConstantsAddress.ADDRESS_EB_DELETE_PRODUCT_CATEGORY, message -> {
-      LOGGER.info(Constants.LOGGER_ADDRESS_AND_MESSAGE,
-          ConstantsAddress.ADDRESS_EB_DELETE_PRODUCT_CATEGORY,
+      LOGGER.info(Constants.LOGGER_ADDRESS_AND_MESSAGE, ConstantsAddress.ADDRESS_EB_DELETE_PRODUCT_CATEGORY,
           message.body());
-      productCategoryRepositories.deleteProductCategory(message.body().toString())
-          .setHandler(res -> {
-            replyMessageEB.replyMessage(message, res, TypeValueReply.JSON_OBJECT,
-                Constants.MESSAGE_DELETE_SUCCESS);
-          });
+      productCategoryRepositories.deleteProductCategory(message.body().toString()).setHandler(res -> {
+        if (res.succeeded()) {
+          message.reply(Constants.MESSAGE_DELETE_SUCCESS);
+        } else {
+          message.reply(Constants.MESSAGE_DELETE_FAIL);
+        }
+      });
     });
   }
 }

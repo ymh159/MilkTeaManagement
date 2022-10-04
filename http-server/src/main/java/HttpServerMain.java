@@ -1,10 +1,10 @@
-import java.io.FileNotFoundException;
-import utils.ClusterDeloyVerticle;
+import io.vertx.core.Vertx;
+import utils.DeloyVerticle;
 
 public class HttpServerMain {
 
-  public static void main(String[] args){
-    ClusterDeloyVerticle clusterDeloyVerticle = new ClusterDeloyVerticle();
-    clusterDeloyVerticle.deloyVerticleCommon(CreateHttpServer.class);
+  public static void main(String[] args) {
+    DeloyVerticle deloyVerticle = new DeloyVerticle();
+    deloyVerticle.deloyVerticleCommon(CreateHttpServer.class);
   }
 }

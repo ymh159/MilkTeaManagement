@@ -1,5 +1,4 @@
 import entity.ProviderEntity;
-import entity.TypeValueReply;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonArray;
@@ -12,7 +11,6 @@ import repositories.ProviderRepositories;
 import repositories.impl.ProviderRepositoriesImpl;
 import utils.Constants;
 import utils.ConstantsAddress;
-import utils.ReplyMessageEB;
 
 public class ProviderVerticle extends AbstractVerticle {
 
@@ -22,15 +20,19 @@ public class ProviderVerticle extends AbstractVerticle {
   public void start() throws Exception {
     ProviderRepositories providerRepositories = new ProviderRepositoriesImpl(vertx);
     EventBus eb = vertx.eventBus();
-    ReplyMessageEB replyMessageEB = new ReplyMessageEB();
 
     // get provider by id
     eb.consumer(ConstantsAddress.ADDRESS_EB_GET_PROVIDER_BY_ID, message -> {
-      LOGGER.info(Constants.LOGGER_ADDRESS_AND_MESSAGE,
-          ConstantsAddress.ADDRESS_EB_GET_PROVIDER_BY_ID,
+      LOGGER.info(Constants.LOGGER_ADDRESS_AND_MESSAGE, ConstantsAddress.ADDRESS_EB_GET_PROVIDER_BY_ID,
           message.body());
       providerRepositories.findProviderById(message.body().toString()).setHandler(res -> {
-        replyMessageEB.replyMessage(message, res, TypeValueReply.JSON_OBJECT);
+        if (res.succeeded()) {
+          ProviderEntity providerEntity = res.result();
+          JsonObject jsonObject = JsonObject.mapFrom(providerEntity);
+          message.reply(jsonObject);
+        } else {
+          message.reply(Constants.MESSAGE_GET_FAIL);
+        }
       });
     });
 
@@ -39,7 +41,13 @@ public class ProviderVerticle extends AbstractVerticle {
       LOGGER.info(Constants.LOGGER_ADDRESS_AND_MESSAGE, ConstantsAddress.ADDRESS_EB_GET_PROVIDER,
           message.body());
       providerRepositories.getProviders().setHandler(res -> {
-        replyMessageEB.replyMessage(message, res, TypeValueReply.JSON_ARRAY);
+        if (res.succeeded()) {
+          List<ProviderEntity> providerEntityList = res.result();
+          JsonArray jsonArray = new JsonArray(providerEntityList);
+          message.reply(jsonArray);
+        } else {
+          message.reply(Constants.MESSAGE_GET_FAIL);
+        }
       });
     });
 
@@ -50,8 +58,11 @@ public class ProviderVerticle extends AbstractVerticle {
       JsonObject json = JsonObject.mapFrom(message.body());
       ProviderEntity providerEntity = json.mapTo(ProviderEntity.class);
       providerRepositories.insertProvider(providerEntity).setHandler(res -> {
-        replyMessageEB.replyMessage(message, res, TypeValueReply.JSON_OBJECT,
-            Constants.MESSAGE_INSERT_SUCCESS);
+        if (res.succeeded()) {
+          message.reply(Constants.MESSAGE_INSERT_SUCCESS);
+        } else {
+          message.reply(Constants.MESSAGE_INSERT_FAIL);
+        }
       });
     });
 
@@ -64,8 +75,11 @@ public class ProviderVerticle extends AbstractVerticle {
       ProviderEntity providerEntity = jsonUpdate.mapTo(ProviderEntity.class);
       providerRepositories.updateProvider(json.getValue(Constants._ID).toString(), providerEntity)
           .setHandler(res -> {
-            replyMessageEB.replyMessage(message, res, TypeValueReply.JSON_OBJECT,
-                Constants.MESSAGE_UPDATE_SUCCESS);
+            if (res.succeeded()) {
+              message.reply(Constants.MESSAGE_UPDATE_SUCCESS);
+            } else {
+              message.reply(Constants.MESSAGE_UPDATE_FAIL);
+            }
           });
     });
 
@@ -74,8 +88,11 @@ public class ProviderVerticle extends AbstractVerticle {
       LOGGER.info(Constants.LOGGER_ADDRESS_AND_MESSAGE, ConstantsAddress.ADDRESS_EB_DELETE_PROVIDER,
           message.body());
       providerRepositories.deleteProvider(message.body().toString()).setHandler(res -> {
-        replyMessageEB.replyMessage(message, res, TypeValueReply.JSON_OBJECT,
-            Constants.MESSAGE_DELETE_SUCCESS);
+        if (res.succeeded()) {
+          message.reply(Constants.MESSAGE_DELETE_SUCCESS);
+        } else {
+          message.reply(Constants.MESSAGE_DELETE_FAIL);
+        }
       });
     });
   }
