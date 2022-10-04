@@ -1,18 +1,18 @@
 package repositories.impl;
 
 import entity.OrderDetailEntity;
-import entity.OrderEntity;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.mongo.MongoClient;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import repositories.OrderDetailRepositories;
-import repositories.OrderRepositories;
 import utils.Constants;
 import utils.MongoDBClient;
 
@@ -21,7 +21,7 @@ public class OrderDetailRepositoriesImpl implements OrderDetailRepositories {
   private static final Logger LOGGER = LoggerFactory.getLogger(OrderDetailRepositoriesImpl.class);
   private static MongoClient mongoClient;
 
-  public OrderDetailRepositoriesImpl(Vertx vertx) {
+  public OrderDetailRepositoriesImpl(Vertx vertx){
     mongoClient = MongoDBClient.client(vertx);
   }
 
@@ -50,7 +50,8 @@ public class OrderDetailRepositoriesImpl implements OrderDetailRepositories {
   public Future<OrderDetailEntity> findOrderDetailById(String id) {
     Future<OrderDetailEntity> future = Future.future();
 
-    mongoClient.findOne(Constants.COLLECTION_ORDER_DETAIL, new JsonObject().put(Constants._ID, id), null,
+    mongoClient.findOne(Constants.COLLECTION_ORDER_DETAIL, new JsonObject().put(Constants._ID, id),
+        null,
         res -> {
           if (res.succeeded()) {
             OrderDetailEntity orderDetailEntity = res.result().mapTo(OrderDetailEntity.class);
@@ -61,7 +62,7 @@ public class OrderDetailRepositoriesImpl implements OrderDetailRepositories {
             future.fail(res.cause());
           }
         });
-    return null;
+    return future;
   }
 
   @Override
@@ -89,17 +90,18 @@ public class OrderDetailRepositoriesImpl implements OrderDetailRepositories {
     JsonObject jsonUpdate = JsonObject.mapFrom(orderDetailEntity);
     JsonObject query = new JsonObject().put(Constants._ID, id);
     jsonUpdate.getMap().values().removeIf(Objects::isNull);
-    JsonObject jsonQueryUpdate = new JsonObject().put(Constants.DOCUMENT_SET,jsonUpdate);
+    JsonObject jsonQueryUpdate = new JsonObject().put(Constants.DOCUMENT_SET, jsonUpdate);
 
-    mongoClient.updateCollection(Constants.COLLECTION_ORDER_DETAIL, query, jsonQueryUpdate, event -> {
-      if (event.succeeded()) {
-        future.complete();
-        LOGGER.info("updateOrderDetail:{}", query);
-      } else {
-        future.fail(event.cause());
-        LOGGER.info(Constants.MESSAGE_UPDATE_FAIL + " updateOrderDetail:{}", query);
-      }
-    });
+    mongoClient.updateCollection(Constants.COLLECTION_ORDER_DETAIL, query, jsonQueryUpdate,
+        event -> {
+          if (event.succeeded()) {
+            future.complete();
+            LOGGER.info("updateOrderDetail:{}", query);
+          } else {
+            future.fail(event.cause());
+            LOGGER.info(Constants.MESSAGE_UPDATE_FAIL + " updateOrderDetail:{}", query);
+          }
+        });
 
     return future;
   }
@@ -107,7 +109,8 @@ public class OrderDetailRepositoriesImpl implements OrderDetailRepositories {
   @Override
   public Future<Void> deleteOrderDetail(String id) {
     Future<Void> future = Future.future();
-    mongoClient.findOneAndDelete(Constants.COLLECTION_ORDER_DETAIL, new JsonObject().put(Constants._ID, id),
+    mongoClient.findOneAndDelete(Constants.COLLECTION_ORDER_DETAIL,
+        new JsonObject().put(Constants._ID, id),
         event -> {
           if (event.succeeded()) {
             future.complete();
@@ -117,6 +120,29 @@ public class OrderDetailRepositoriesImpl implements OrderDetailRepositories {
             LOGGER.info(Constants.MESSAGE_DELETE_FAIL + " deleteOrderDetail:{}", id);
           }
         });
+    return future;
+  }
+
+  @Override
+  public Future<List<OrderDetailEntity>> findOrderDetailByOrderId(String order_id) {
+    Future<List<OrderDetailEntity>> future = Future.future();
+    mongoClient.find(Constants.COLLECTION_ORDER_DETAIL,
+        new JsonObject().put(Constants.ORDER_ID, order_id), res -> {
+          if (res.succeeded()) {
+            if (res.result() != null) {
+              List<OrderDetailEntity> orderDetailEntityList = new ArrayList<>();
+              orderDetailEntityList = res.result().stream()
+                  .map(orderDetail -> orderDetail.mapTo(OrderDetailEntity.class))
+                  .collect(Collectors.toList());
+              future.complete(orderDetailEntityList);
+            } else {
+              future.fail(new Exception("Find not found"));
+            }
+          } else {
+            future.fail(res.cause());
+          }
+        });
+
     return future;
   }
 }

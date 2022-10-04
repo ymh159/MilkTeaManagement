@@ -14,9 +14,11 @@ public class ConstantsAddress {
   public static final String ADDRESS_EB_GET_PROVIDER =  "get.provider";
   public static final String ADDRESS_EB_GET_USER =  "get.user";
   public static final String ADDRESS_EB_ORDER_PRODUCT =  "order.product";
+  public static final String ADDRESS_EB_GET_ORDER_PRODUCT_DETAIL =  "get.order.product.detail";
 
   public static final String ADDRESS_EB_GET_CUSTOMER_BY_ID =  "get.customer.by.id";
   public static final String ADDRESS_EB_GET_ORDER_DETAIL_BY_ID =  "get.order_detail.by.id";
+  public static final String ADDRESS_EB_GET_ORDER_DETAIL_BY_ORDER_ID =  "get.order_detail.by.order_id";
   public static final String ADDRESS_EB_GET_ORDER_BY_ID =  "get.order.by.id";
   public static final String ADDRESS_EB_GET_PRODUCT_CATEGORY_BY_ID =  "get.product_category.by.id";
   public static final String ADDRESS_EB_GET_PRODUCT_BY_ID =  "get.product.by.id";

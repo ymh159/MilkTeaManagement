@@ -5,6 +5,7 @@ import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.mongo.MongoClient;
+import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.Objects;
 import org.bson.types.ObjectId;
@@ -19,7 +20,7 @@ public class OrderRepositoriesImpl implements OrderRepositories {
   private static final Logger LOGGER = LoggerFactory.getLogger(OrderRepositoriesImpl.class);
   private static MongoClient mongoClient;
 
-  public OrderRepositoriesImpl(Vertx vertx) {
+  public OrderRepositoriesImpl(Vertx vertx){
     mongoClient = MongoDBClient.client(vertx);
   }
 
@@ -64,18 +65,19 @@ public class OrderRepositoriesImpl implements OrderRepositories {
   }
 
   @Override
-  public Future<Void> insertOrder(OrderEntity orderEntity) {
-    Future<Void> future = Future.future();
+  public Future<String> insertOrder(OrderEntity orderEntity) {
+    Future<String> future = Future.future();
     orderEntity.setId(ObjectId.get().toHexString());
     JsonObject query = JsonObject.mapFrom(orderEntity);
+    //query.put(Constants.DATE_ORDER, new JsonObject().put("$date",query.getValue(Constants.DATE_ORDER)));
 
     mongoClient.insert(Constants.COLLECTION_ORDER, query, event -> {
       if (event.succeeded()) {
-        future.complete();
+        future.complete(orderEntity.getId());
         LOGGER.info("insertOrder:{}", query);
       } else {
         future.fail(event.cause());
-        LOGGER.info(Constants.MESSAGE_INSERT_FAIL + " query:{}", query);
+        LOGGER.info(Constants.MESSAGE_INSERT_FAIL + " insertOrder:{}", query);
       }
     });
 
