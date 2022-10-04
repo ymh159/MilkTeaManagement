@@ -1,7 +1,6 @@
 package repositories.impl;
 
 import entity.OrderDetailEntity;
-import entity.OrderEntity;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
@@ -14,7 +13,6 @@ import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import repositories.OrderDetailRepositories;
-import repositories.OrderRepositories;
 import utils.Constants;
 import utils.MongoDBClient;
 
@@ -23,7 +21,7 @@ public class OrderDetailRepositoriesImpl implements OrderDetailRepositories {
   private static final Logger LOGGER = LoggerFactory.getLogger(OrderDetailRepositoriesImpl.class);
   private static MongoClient mongoClient;
 
-  public OrderDetailRepositoriesImpl(Vertx vertx) {
+  public OrderDetailRepositoriesImpl(Vertx vertx){
     mongoClient = MongoDBClient.client(vertx);
   }
 

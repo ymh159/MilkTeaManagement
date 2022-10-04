@@ -1,10 +1,11 @@
-import utils.DeloyVerticle;
+import java.io.FileNotFoundException;
+import utils.ClusterDeloyVerticle;
 
 
 public class ProductCategoryMain {
 
   public static void main(String[] args) {
-    DeloyVerticle deloyVerticle = new DeloyVerticle();
-    deloyVerticle.deloyVerticleCommon(ProductCategoryVerticle.class);
+    ClusterDeloyVerticle clusterDeloyVerticle = new ClusterDeloyVerticle();
+    clusterDeloyVerticle.deloyVerticleCommon(ProductCategoryVerticle.class);
   }
 }

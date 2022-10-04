@@ -6,6 +6,13 @@ public class Constants {
   public static final String CONFIG_MONGO_HOST_VALUE = "mongodb://localhost:27017";
   public static final String CONFIG_MONGO_DB_NAME_KEY = "db_name";
   public static final String CONFIG_MONGO_DB_NAME_VALUE = "milk_tea";
+  public static final String PATH_PROPERTIES = "config.properties";
+  public static final String IP_ADDRESS = "ip_address";
+  public static final String STATUS = "status_message";
+  public static final String VALUE = "value";
+  public static final String MESSAGE = "message";
+  public static final String PASS = "pass";
+  public static final String FAIL = "fail";
 
   // collection name
   public static final String COLLECTION_CUSTOMER = "customer";
@@ -42,6 +49,7 @@ public class Constants {
   public static final String MESSAGE_DELETE_FAIL = "Delete Fail";
   public static final String MESSAGE_UPDATE_FAIL = "Update Fail";
   public static final String MESSAGE_GET_FAIL = "Get Data Fail";
+  public static final String CAN_NOT_DELOY = "Can't deloy";
 
   // path
   public static final String PATH_CUSTOMER = "/api/customer";

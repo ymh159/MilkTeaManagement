@@ -5,6 +5,7 @@ import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.mongo.MongoClient;
+import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.Objects;
 import org.bson.types.ObjectId;
@@ -19,7 +20,7 @@ public class OrderRepositoriesImpl implements OrderRepositories {
   private static final Logger LOGGER = LoggerFactory.getLogger(OrderRepositoriesImpl.class);
   private static MongoClient mongoClient;
 
-  public OrderRepositoriesImpl(Vertx vertx) {
+  public OrderRepositoriesImpl(Vertx vertx){
     mongoClient = MongoDBClient.client(vertx);
   }
 

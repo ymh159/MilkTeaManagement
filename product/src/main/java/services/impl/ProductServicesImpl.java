@@ -60,7 +60,7 @@ public class ProductServicesImpl implements ProductServices {
             });
 
             return productDetailDTOFuture;
-          }).collect(Collectors.toList());
+          }).toList();
       CompositeFuture.all(new ArrayList<>(collect))
           .setHandler(hl -> {
             if (hl.succeeded()) {

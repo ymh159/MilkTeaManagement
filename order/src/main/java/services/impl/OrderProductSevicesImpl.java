@@ -115,7 +115,7 @@ public class OrderProductSevicesImpl implements OrderProductSevices {
                   }
                 });
             return futureResult;
-          }).collect(Collectors.toList());
+          }).toList();
 
       CompositeFuture.all(new ArrayList<>(futureUpdateValueList)).setHandler(compositeOrder -> {
         if (compositeOrder.succeeded()) {
@@ -171,68 +171,41 @@ public class OrderProductSevicesImpl implements OrderProductSevices {
   @Override
   public Future<ProductOrderDetailDTO> getOrderProductDetail(String id) {
     Future<ProductOrderDetailDTO> future = Future.future();
-    ProductOrderDetailDTO productOrderDetailDTO = new ProductOrderDetailDTO();
     // get order
     findOrderById(id).setHandler(resOrder -> {
 
       if (resOrder.succeeded()) {
-        Future<UserEntity> futureGetUser =  Future.future();
-        Future<CustomerEntity> futureGetCustomer =  Future.future();
+        Future<UserEntity> futureGetUser = findUserById(resOrder.result().getUser_id());
+        Future<CustomerEntity> futureGetCustomer = findCustomerById(
+            resOrder.result().getCustomer_id());
         Future<List<ProductOrderDTO>> futureListProDTO = Future.future();
 
-        futureGetUser.compose(composeUser -> {
-          vertx.eventBus()
-              .send(ConstantsAddress.ADDRESS_EB_GET_USER_BY_ID, resOrder.result().getUser_id(),
-                  messageReply -> {
-                    if (messageReply.succeeded()) {
-                      UserEntity userEntity = JsonObject.mapFrom(messageReply.result().body())
-                          .mapTo(UserEntity.class);
-                      productOrderDetailDTO.setUser_name(userEntity.getUser_name());
-                      futureGetUser.complete(userEntity);
-                    } else {
-                      futureGetUser.fail(messageReply.cause());
-                    }
-                  });
-          return futureGetUser;
-        });
-
-        futureGetCustomer.compose(composeCustomer -> {
-          vertx.eventBus().send(ConstantsAddress.ADDRESS_EB_GET_CUSTOMER_BY_ID,
-              resOrder.result().getCustomer_id(), messageReply -> {
-                if (messageReply.succeeded()) {
-                  CustomerEntity customerEntity = JsonObject.mapFrom(messageReply.result().body())
-                      .mapTo(CustomerEntity.class);
-                  productOrderDetailDTO.setCustomer_name(customerEntity.getCustomer_name());
-                  productOrderDetailDTO.setPhone(customerEntity.getPhone());
-                  futureGetCustomer.complete(customerEntity);
-
-                } else {
-                  futureGetCustomer.fail(messageReply.cause());
-                }
-              });
-          return futureGetCustomer;
-        });
-
         // get list order detail
-        findOrderDetailByOrderId(id).compose(resOrderDetail -> {
+        findOrderDetailByOrderId(id).setHandler(resOrderDetail -> {
           // get product order detail
-          List<OrderDetailEntity> orderDetailEntityList = resOrderDetail;
-
+          List<OrderDetailEntity> orderDetailEntityList = resOrderDetail.result();
           List<ProductOrderDTO> productOrderDTOList = orderDetailEntityList.stream()
               .map(orderDetailEntity -> {
                 JsonObject jsonObject = JsonObject.mapFrom(orderDetailEntity);
                 return jsonObject.mapTo(ProductOrderDTO.class);
               }).collect(Collectors.toList());
-
-//            productOrderDetailDTO = JsonObject.mapFrom(resOrder.result())
-//                .mapTo(ProductOrderDetailDTO.class);
-          productOrderDetailDTO.setProduct_order(productOrderDTOList);
           futureListProDTO.complete(productOrderDTOList);
-          return futureListProDTO;
         });
-        CompositeFuture.all(futureListProDTO, futureGetUser, futureGetCustomer).setHandler(compose->{
-            future.complete(productOrderDetailDTO);
-        });
+
+        CompositeFuture.all(futureListProDTO, futureGetUser, futureGetCustomer)
+            .setHandler(compose -> {
+              ProductOrderDetailDTO productOrderDetailDTO
+                  = JsonObject.mapFrom(resOrder.result())
+                  .mapTo(ProductOrderDetailDTO.class);
+              UserEntity userEntity = compose.result().resultAt(1);
+              CustomerEntity customerEntity = compose.result().resultAt(2);
+              productOrderDetailDTO.setProduct_order(compose.result().resultAt(0));
+              productOrderDetailDTO.setUser_name(userEntity.getUser_name());
+              productOrderDetailDTO.setCustomer_name(customerEntity.getCustomer_name());
+              productOrderDetailDTO.setPhone(customerEntity.getPhone());
+
+              future.complete(productOrderDetailDTO);
+            });
 
       } else {
         future.fail(resOrder.cause());
@@ -250,23 +223,61 @@ public class OrderProductSevicesImpl implements OrderProductSevices {
           if (resGetProduct.succeeded()) {
             ProductEntity productEntity = JsonObject.mapFrom(resGetProduct.result().body())
                 .mapTo(ProductEntity.class);
-            productEntity.setValue(productEntity.getValue() - orderDetailEntity.getValue());
-
-            JsonObject jsonObject = new JsonObject();
-            jsonObject.put(Constants._ID, productEntity.getId());
-            jsonObject.put(Constants.JSON_UPDATE, JsonObject.mapFrom(productEntity));
-            vertx.eventBus().send(ConstantsAddress.ADDRESS_EB_UPDATE_PRODUCT, jsonObject
-                , resUpdateProduct -> {
-                  if (resUpdateProduct.succeeded()) {
-                    future.complete();
-                  } else {
-                    future.fail(resUpdateProduct.cause());
-                  }
-                });
+            if (productEntity.getValue() - orderDetailEntity.getValue() >= 0) {
+              productEntity.setValue(productEntity.getValue() - orderDetailEntity.getValue());
+              JsonObject jsonObject = new JsonObject();
+              jsonObject.put(Constants._ID, productEntity.getId());
+              jsonObject.put(Constants.JSON_UPDATE, JsonObject.mapFrom(productEntity));
+              vertx.eventBus().send(ConstantsAddress.ADDRESS_EB_UPDATE_PRODUCT, jsonObject
+                  , resUpdateProduct -> {
+                    if (resUpdateProduct.succeeded()) {
+                      future.complete();
+                    } else {
+                      future.fail(resUpdateProduct.cause());
+                    }
+                  });
+            } else {
+              LOGGER.info("Can't order product. Value product:{}, Value order:{}",
+                  productEntity.getValue(), orderDetailEntity.getValue());
+              future.fail(new IllegalArgumentException("Product " + productEntity.getName() + " Sold out"));
+            }
           } else {
             future.fail(resGetProduct.cause());
           }
         });
+
     return future;
   }
+
+  Future<UserEntity> findUserById(String id) {
+    Future<UserEntity> future = Future.future();
+    vertx.eventBus()
+        .send(ConstantsAddress.ADDRESS_EB_GET_USER_BY_ID, id,
+            messageReply -> {
+              if (messageReply.succeeded()) {
+                UserEntity userEntity = JsonObject.mapFrom(messageReply.result().body())
+                    .mapTo(UserEntity.class);
+                future.complete(userEntity);
+              } else {
+                future.fail(messageReply.cause());
+              }
+            });
+    return future;
+  }
+
+  Future<CustomerEntity> findCustomerById(String id) {
+    Future<CustomerEntity> future = Future.future();
+    vertx.eventBus().send(ConstantsAddress.ADDRESS_EB_GET_CUSTOMER_BY_ID, id, messageReply -> {
+      if (messageReply.succeeded()) {
+        CustomerEntity customerEntity = JsonObject.mapFrom(messageReply.result().body())
+            .mapTo(CustomerEntity.class);
+        future.complete(customerEntity);
+      } else {
+        future.fail(messageReply.cause());
+      }
+    });
+
+    return future;
+  }
+
 }
