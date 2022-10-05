@@ -5,10 +5,9 @@ import router.VerticleRouter;
 import router.handlers.ApplicationHandlers;
 
 public class CreateHttpServer extends AbstractVerticle {
-  private static final Logger LOGGER = LoggerFactory.getLogger(CreateHttpServer.class);
 
   @Override
-  public void start() throws Exception {
+  public void start() {
     VerticleRouter verRouter = new VerticleRouter();
     vertx.createHttpServer()
         .requestHandler(verRouter.getRouter(vertx))

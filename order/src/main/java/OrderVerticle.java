@@ -13,18 +13,18 @@ import repositories.OrderRepositories;
 import repositories.impl.OrderDetailRepositoriesImpl;
 import repositories.impl.OrderRepositoriesImpl;
 import services.OrderProductSevices;
-import services.impl.OrderProductSevicesImpl;
+import services.impl.OrderProductServicesImpl;
 import utils.Constants;
-import utils.ConstantsAddress;
+import utils.AddressConstants;
 import utils.ReplyMessageEB;
 
 public class OrderVerticle extends AbstractVerticle {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(OrderVerticle.class);
+  private static final Logger logger = LoggerFactory.getLogger(OrderVerticle.class);
   ReplyMessageEB replyMessageEB;
 
   @Override
-  public void start() throws Exception {
+  public void start() {
     eventBusOrder(vertx);
     eventBusOrderDetail(vertx);
     eventBusOrderProduct(vertx);
@@ -32,21 +32,21 @@ public class OrderVerticle extends AbstractVerticle {
   }
 
   public void eventBusOrderProduct(Vertx vertx) {
-    OrderProductSevices orderProductSevices = new OrderProductSevicesImpl(vertx);
+    OrderProductSevices orderProductSevices = new OrderProductServicesImpl(vertx);
     EventBus eb = vertx.eventBus();
 
     // get order product detail
-    eb.consumer(ConstantsAddress.ADDRESS_EB_GET_ORDER_PRODUCT_DETAIL, message -> {
-      LOGGER.info(Constants.LOGGER_ADDRESS_AND_MESSAGE,
-          ConstantsAddress.ADDRESS_EB_GET_ORDER_DETAIL,
+    eb.consumer(AddressConstants.ADDRESS_EB_GET_ORDER_PRODUCT_DETAIL, message -> {
+      logger.info(Constants.LOGGER_ADDRESS_AND_MESSAGE,
+          AddressConstants.ADDRESS_EB_GET_ORDER_DETAIL,
           message.body());
       orderProductSevices.getOrderProductDetail(message.body().toString()).setHandler(res -> {
         replyMessageEB.replyMessage(message, res, TypeValueReply.JSON_OBJECT);
       });
     });
 
-    eb.consumer(ConstantsAddress.ADDRESS_EB_ORDER_PRODUCT, message -> {
-      LOGGER.info(Constants.LOGGER_ADDRESS_AND_MESSAGE, ConstantsAddress.ADDRESS_EB_ORDER_PRODUCT,
+    eb.consumer(AddressConstants.ADDRESS_EB_ORDER_PRODUCT, message -> {
+      logger.info(Constants.LOGGER_ADDRESS_AND_MESSAGE, AddressConstants.ADDRESS_EB_ORDER_PRODUCT,
           message.body());
       JsonObject jsonObject = JsonObject.mapFrom(message.body());
       OrderInfoDTO orderInfoDTO = jsonObject.mapTo(OrderInfoDTO.class);
@@ -72,8 +72,8 @@ public class OrderVerticle extends AbstractVerticle {
     EventBus eb = vertx.eventBus();
 
     // get order by id
-    eb.consumer(ConstantsAddress.ADDRESS_EB_GET_ORDER_BY_ID, message -> {
-      LOGGER.info(Constants.LOGGER_ADDRESS_AND_MESSAGE, ConstantsAddress.ADDRESS_EB_GET_ORDER_BY_ID,
+    eb.consumer(AddressConstants.ADDRESS_EB_GET_ORDER_BY_ID, message -> {
+      logger.info(Constants.LOGGER_ADDRESS_AND_MESSAGE, AddressConstants.ADDRESS_EB_GET_ORDER_BY_ID,
           message.body());
       orderRepositories.findOrderById(message.body().toString()).setHandler(res -> {
         replyMessageEB.replyMessage(message, res, TypeValueReply.JSON_OBJECT);
@@ -81,8 +81,8 @@ public class OrderVerticle extends AbstractVerticle {
     });
 
     // get all order
-    eb.consumer(ConstantsAddress.ADDRESS_EB_GET_ORDER, message -> {
-      LOGGER.info(Constants.LOGGER_ADDRESS_AND_MESSAGE, ConstantsAddress.ADDRESS_EB_GET_ORDER,
+    eb.consumer(AddressConstants.ADDRESS_EB_GET_ORDER, message -> {
+      logger.info(Constants.LOGGER_ADDRESS_AND_MESSAGE, AddressConstants.ADDRESS_EB_GET_ORDER,
           message.body());
       orderRepositories.getOrders().setHandler(res -> {
         replyMessageEB.replyMessage(message, res, TypeValueReply.JSON_ARRAY);
@@ -90,8 +90,8 @@ public class OrderVerticle extends AbstractVerticle {
     });
 
     // insert order
-    eb.consumer(ConstantsAddress.ADDRESS_EB_INSERT_ORDER, message -> {
-      LOGGER.info(Constants.LOGGER_ADDRESS_AND_MESSAGE, ConstantsAddress.ADDRESS_EB_INSERT_ORDER,
+    eb.consumer(AddressConstants.ADDRESS_EB_INSERT_ORDER, message -> {
+      logger.info(Constants.LOGGER_ADDRESS_AND_MESSAGE, AddressConstants.ADDRESS_EB_INSERT_ORDER,
           message.body());
       JsonObject json = JsonObject.mapFrom(message.body());
       OrderEntity orderEntity = json.mapTo(OrderEntity.class);
@@ -102,8 +102,8 @@ public class OrderVerticle extends AbstractVerticle {
     });
 
     // update order
-    eb.consumer(ConstantsAddress.ADDRESS_EB_UPDATE_ORDER, message -> {
-      LOGGER.info(Constants.LOGGER_ADDRESS_AND_MESSAGE, ConstantsAddress.ADDRESS_EB_UPDATE_ORDER,
+    eb.consumer(AddressConstants.ADDRESS_EB_UPDATE_ORDER, message -> {
+      logger.info(Constants.LOGGER_ADDRESS_AND_MESSAGE, AddressConstants.ADDRESS_EB_UPDATE_ORDER,
           message.body());
       JsonObject json = JsonObject.mapFrom(message.body());
       JsonObject jsonUpdate = JsonObject.mapFrom(json.getValue(Constants.JSON_UPDATE));
@@ -116,8 +116,8 @@ public class OrderVerticle extends AbstractVerticle {
     });
 
     // delete order
-    eb.consumer(ConstantsAddress.ADDRESS_EB_DELETE_ORDER, message -> {
-      LOGGER.info(Constants.LOGGER_ADDRESS_AND_MESSAGE, ConstantsAddress.ADDRESS_EB_DELETE_ORDER,
+    eb.consumer(AddressConstants.ADDRESS_EB_DELETE_ORDER, message -> {
+      logger.info(Constants.LOGGER_ADDRESS_AND_MESSAGE, AddressConstants.ADDRESS_EB_DELETE_ORDER,
           message.body());
       orderRepositories.deleteOrder(message.body().toString()).setHandler(res -> {
         replyMessageEB.replyMessage(message, res, TypeValueReply.JSON_OBJECT,
@@ -128,13 +128,13 @@ public class OrderVerticle extends AbstractVerticle {
 
   public void eventBusOrderDetail(Vertx vertx) {
     OrderDetailRepositories orderDetailRepositories = new OrderDetailRepositoriesImpl(vertx);
-    OrderProductSevices orderProductSevices = new OrderProductSevicesImpl(vertx);
+    OrderProductSevices orderProductSevices = new OrderProductServicesImpl(vertx);
     EventBus eb = vertx.eventBus();
 
     // get orderDetail by id
-    eb.consumer(ConstantsAddress.ADDRESS_EB_GET_ORDER_DETAIL_BY_ID, message -> {
-      LOGGER.info(Constants.LOGGER_ADDRESS_AND_MESSAGE,
-          ConstantsAddress.ADDRESS_EB_GET_ORDER_DETAIL_BY_ID,
+    eb.consumer(AddressConstants.ADDRESS_EB_GET_ORDER_DETAIL_BY_ID, message -> {
+      logger.info(Constants.LOGGER_ADDRESS_AND_MESSAGE,
+          AddressConstants.ADDRESS_EB_GET_ORDER_DETAIL_BY_ID,
           message.body());
       orderDetailRepositories.findOrderDetailById(message.body().toString()).setHandler(res -> {
         replyMessageEB.replyMessage(message, res, TypeValueReply.JSON_OBJECT);
@@ -142,9 +142,9 @@ public class OrderVerticle extends AbstractVerticle {
     });
 
     // get orderDetail by order_id
-    eb.consumer(ConstantsAddress.ADDRESS_EB_GET_ORDER_DETAIL_BY_ORDER_ID, message -> {
-      LOGGER.info(Constants.LOGGER_ADDRESS_AND_MESSAGE,
-          ConstantsAddress.ADDRESS_EB_GET_ORDER_DETAIL_BY_ORDER_ID,
+    eb.consumer(AddressConstants.ADDRESS_EB_GET_ORDER_DETAIL_BY_ORDER_ID, message -> {
+      logger.info(Constants.LOGGER_ADDRESS_AND_MESSAGE,
+          AddressConstants.ADDRESS_EB_GET_ORDER_DETAIL_BY_ORDER_ID,
           message.body());
       orderProductSevices.findOrderDetailByOrderId(message.body().toString()).setHandler(res -> {
         replyMessageEB.replyMessage(message, res, TypeValueReply.JSON_ARRAY);
@@ -152,9 +152,9 @@ public class OrderVerticle extends AbstractVerticle {
     });
 
     // get all orderDetail
-    eb.consumer(ConstantsAddress.ADDRESS_EB_GET_ORDER_DETAIL, message -> {
-      LOGGER.info(Constants.LOGGER_ADDRESS_AND_MESSAGE,
-          ConstantsAddress.ADDRESS_EB_GET_ORDER_DETAIL,
+    eb.consumer(AddressConstants.ADDRESS_EB_GET_ORDER_DETAIL, message -> {
+      logger.info(Constants.LOGGER_ADDRESS_AND_MESSAGE,
+          AddressConstants.ADDRESS_EB_GET_ORDER_DETAIL,
           message.body());
       orderDetailRepositories.getOrderDetails().setHandler(res -> {
         replyMessageEB.replyMessage(message, res, TypeValueReply.JSON_ARRAY);
@@ -162,9 +162,9 @@ public class OrderVerticle extends AbstractVerticle {
     });
 
     // insert orderDetail
-    eb.consumer(ConstantsAddress.ADDRESS_EB_INSERT_ORDER_DETAIL, message -> {
-      LOGGER.info(Constants.LOGGER_ADDRESS_AND_MESSAGE,
-          ConstantsAddress.ADDRESS_EB_INSERT_ORDER_DETAIL,
+    eb.consumer(AddressConstants.ADDRESS_EB_INSERT_ORDER_DETAIL, message -> {
+      logger.info(Constants.LOGGER_ADDRESS_AND_MESSAGE,
+          AddressConstants.ADDRESS_EB_INSERT_ORDER_DETAIL,
           message.body());
       JsonObject json = JsonObject.mapFrom(message.body());
       OrderDetailEntity orderDetailEntity = json.mapTo(OrderDetailEntity.class);
@@ -175,9 +175,9 @@ public class OrderVerticle extends AbstractVerticle {
     });
 
     // update orderDetail
-    eb.consumer(ConstantsAddress.ADDRESS_EB_UPDATE_ORDER_DETAIL, message -> {
-      LOGGER.info(Constants.LOGGER_ADDRESS_AND_MESSAGE,
-          ConstantsAddress.ADDRESS_EB_UPDATE_ORDER_DETAIL,
+    eb.consumer(AddressConstants.ADDRESS_EB_UPDATE_ORDER_DETAIL, message -> {
+      logger.info(Constants.LOGGER_ADDRESS_AND_MESSAGE,
+          AddressConstants.ADDRESS_EB_UPDATE_ORDER_DETAIL,
           message.body());
       JsonObject json = JsonObject.mapFrom(message.body());
       JsonObject jsonUpdate = JsonObject.mapFrom(json.getValue(Constants.JSON_UPDATE));
@@ -191,9 +191,9 @@ public class OrderVerticle extends AbstractVerticle {
     });
 
     // delete orderDetail
-    eb.consumer(ConstantsAddress.ADDRESS_EB_DELETE_ORDER_DETAIL, message -> {
-      LOGGER.info(Constants.LOGGER_ADDRESS_AND_MESSAGE,
-          ConstantsAddress.ADDRESS_EB_DELETE_ORDER_DETAIL,
+    eb.consumer(AddressConstants.ADDRESS_EB_DELETE_ORDER_DETAIL, message -> {
+      logger.info(Constants.LOGGER_ADDRESS_AND_MESSAGE,
+          AddressConstants.ADDRESS_EB_DELETE_ORDER_DETAIL,
           message.body());
       orderDetailRepositories.deleteOrderDetail(message.body().toString()).setHandler(res -> {
         replyMessageEB.replyMessage(message, res, TypeValueReply.JSON_OBJECT,

@@ -26,17 +26,17 @@ import repositories.impl.OrderDetailRepositoriesImpl;
 import repositories.impl.OrderRepositoriesImpl;
 import services.OrderProductSevices;
 import utils.Constants;
-import utils.ConstantsAddress;
+import utils.AddressConstants;
 
-public class OrderProductSevicesImpl implements OrderProductSevices {
+public class OrderProductServicesImpl implements OrderProductSevices {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(OrderProductSevices.class);
+  private static final Logger logger = LoggerFactory.getLogger(OrderProductSevices.class);
   private final OrderDetailRepositories orderDetailRepositories;
   private final OrderRepositories orderRepositories;
 
   private final Vertx vertx;
 
-  public OrderProductSevicesImpl(Vertx vertx) {
+  public OrderProductServicesImpl(Vertx vertx) {
     orderDetailRepositories = new OrderDetailRepositoriesImpl(vertx);
     orderRepositories = new OrderRepositoriesImpl(vertx);
     this.vertx = vertx;
@@ -73,13 +73,13 @@ public class OrderProductSevicesImpl implements OrderProductSevices {
     Future<String> future = Future.future();
     JsonObject jsonOrder = new JsonObject();
     List<ProductOrderDTO> productOrderDTOList = orderInfoDTO.getProduct_order();
-    int total_value = 0;
+    int total_quantity = 0;
     int total_price = 0;
 
     for (ProductOrderDTO productOrderDTO : productOrderDTOList
     ) {
-      total_value += productOrderDTO.getValue();
-      total_price += productOrderDTO.getValue() * productOrderDTO.getPrice();
+      total_quantity += productOrderDTO.getQuantity();
+      total_price += productOrderDTO.getQuantity() * productOrderDTO.getPrice();
     }
 
     DateFormat dateFormat = new SimpleDateFormat(Constants.FORMAT_DATE_JSON);
@@ -87,7 +87,7 @@ public class OrderProductSevicesImpl implements OrderProductSevices {
         .put(Constants.DATE_ORDER, dateFormat.format(new Date()))
         .put(Constants.USER_ID, orderInfoDTO.getUser_id())
         .put(Constants.CUSTOMER_ID, orderInfoDTO.getCustomer_id())
-        .put(Constants.TOTAL_VALUE, total_value)
+        .put(Constants.TOTAL_VALUE, total_quantity)
         .put(Constants.TOTAL_PRICE, total_price);
     OrderEntity orderEntity = jsonOrder.mapTo(OrderEntity.class);
 
@@ -97,7 +97,7 @@ public class OrderProductSevicesImpl implements OrderProductSevices {
             OrderDetailEntity orderDetailEntity = new OrderDetailEntity();
             orderDetailEntity.setOrder_id(res.result());
             orderDetailEntity.setProduct_id(productOrderDTO.getProduct_id());
-            orderDetailEntity.setValue(productOrderDTO.getValue());
+            orderDetailEntity.setQuantity(productOrderDTO.getQuantity());
             orderDetailEntity.setPrice(productOrderDTO.getPrice());
             orderDetailEntity.setName(productOrderDTO.getName());
 
@@ -218,29 +218,38 @@ public class OrderProductSevicesImpl implements OrderProductSevices {
   public Future<Void> updateValueProduct(OrderDetailEntity orderDetailEntity) {
     Future<Void> future = Future.future();
 
-    vertx.eventBus().send(ConstantsAddress.ADDRESS_EB_GET_PRODUCT_BY_ID,
+    vertx.eventBus().send(AddressConstants.ADDRESS_EB_GET_PRODUCT_BY_ID,
         orderDetailEntity.getProduct_id(), resGetProduct -> {
+          JsonObject jsonMessage = JsonObject.mapFrom(resGetProduct.result().body());
           if (resGetProduct.succeeded()) {
-            ProductEntity productEntity = JsonObject.mapFrom(resGetProduct.result().body())
-                .mapTo(ProductEntity.class);
-            if (productEntity.getValue() - orderDetailEntity.getValue() >= 0) {
-              productEntity.setValue(productEntity.getValue() - orderDetailEntity.getValue());
-              JsonObject jsonObject = new JsonObject();
-              jsonObject.put(Constants._ID, productEntity.getId());
-              jsonObject.put(Constants.JSON_UPDATE, JsonObject.mapFrom(productEntity));
-              vertx.eventBus().send(ConstantsAddress.ADDRESS_EB_UPDATE_PRODUCT, jsonObject
-                  , resUpdateProduct -> {
-                    if (resUpdateProduct.succeeded()) {
-                      future.complete();
-                    } else {
-                      future.fail(resUpdateProduct.cause());
-                    }
-                  });
-            } else {
-              LOGGER.info("Can't order product. Value product:{}, Value order:{}",
-                  productEntity.getValue(), orderDetailEntity.getValue());
-              future.fail(new IllegalArgumentException("Product " + productEntity.getName() + " Sold out"));
+
+            if(!jsonMessage.getValue(Constants.STATUS).equals(Constants.FAIL)){
+              JsonObject jsonProduct = (JsonObject) jsonMessage.getValue(Constants.VALUE);
+              ProductEntity productEntity = JsonObject.mapFrom(jsonProduct)
+                  .mapTo(ProductEntity.class);
+              if (productEntity.getQuantity() - orderDetailEntity.getQuantity() >= 0) {
+                productEntity.setQuantity(productEntity.getQuantity() - orderDetailEntity.getQuantity());
+                JsonObject jsonObject = new JsonObject();
+                jsonObject.put(Constants._ID, productEntity.getId());
+                jsonObject.put(Constants.JSON_UPDATE, JsonObject.mapFrom(productEntity));
+                vertx.eventBus().send(AddressConstants.ADDRESS_EB_UPDATE_PRODUCT, jsonObject
+                    , resUpdateProduct -> {
+                      if (resUpdateProduct.succeeded()) {
+                        future.complete();
+                      } else {
+                        future.fail(resUpdateProduct.cause());
+                      }
+                    });
+              } else {
+                logger.info("Can't order product. Value product:{}, Value order:{}",
+                    productEntity.getQuantity(), orderDetailEntity.getQuantity());
+                future.fail(new IllegalArgumentException("Product " + productEntity.getName() + " Sold out"));
+              }
+            }else {
+              future.fail(new NullPointerException(jsonMessage.getValue(Constants.MESSAGE).toString()));
+
             }
+
           } else {
             future.fail(resGetProduct.cause());
           }
@@ -252,10 +261,12 @@ public class OrderProductSevicesImpl implements OrderProductSevices {
   Future<UserEntity> findUserById(String id) {
     Future<UserEntity> future = Future.future();
     vertx.eventBus()
-        .send(ConstantsAddress.ADDRESS_EB_GET_USER_BY_ID, id,
+        .send(AddressConstants.ADDRESS_EB_GET_USER_BY_ID, id,
             messageReply -> {
               if (messageReply.succeeded()) {
-                UserEntity userEntity = JsonObject.mapFrom(messageReply.result().body())
+                JsonObject jsonMessage = JsonObject.mapFrom(messageReply.result().body());
+                JsonObject jsonUser = (JsonObject) jsonMessage.getValue(Constants.VALUE);
+                UserEntity userEntity = JsonObject.mapFrom(jsonUser)
                     .mapTo(UserEntity.class);
                 future.complete(userEntity);
               } else {
@@ -267,9 +278,11 @@ public class OrderProductSevicesImpl implements OrderProductSevices {
 
   Future<CustomerEntity> findCustomerById(String id) {
     Future<CustomerEntity> future = Future.future();
-    vertx.eventBus().send(ConstantsAddress.ADDRESS_EB_GET_CUSTOMER_BY_ID, id, messageReply -> {
+    vertx.eventBus().send(AddressConstants.ADDRESS_EB_GET_CUSTOMER_BY_ID, id, messageReply -> {
       if (messageReply.succeeded()) {
-        CustomerEntity customerEntity = JsonObject.mapFrom(messageReply.result().body())
+        JsonObject jsonMessage = JsonObject.mapFrom(messageReply.result().body());
+        JsonObject jsonCustomer = (JsonObject) jsonMessage.getValue(Constants.VALUE);
+        CustomerEntity customerEntity = JsonObject.mapFrom(jsonCustomer)
             .mapTo(CustomerEntity.class);
         future.complete(customerEntity);
       } else {

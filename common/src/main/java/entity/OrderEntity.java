@@ -2,6 +2,7 @@ package entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Date;
 import lombok.AllArgsConstructor;
@@ -11,6 +12,7 @@ import utils.Constants;
 
 @AllArgsConstructor
 @RequiredArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 public class OrderEntity {
 
@@ -20,7 +22,7 @@ public class OrderEntity {
   private Date date_order;
   private String user_id;
   private String customer_id;
-  private int total_value;
+  private int total_quantity;
   private int total_price;
 
 }

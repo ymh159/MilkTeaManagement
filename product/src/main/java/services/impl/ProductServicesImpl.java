@@ -15,11 +15,11 @@ import repositories.ProductRepositories;
 import repositories.impl.ProductRepositoriesImpl;
 import services.ProductServices;
 import utils.Constants;
-import utils.ConstantsAddress;
+import utils.AddressConstants;
 
 public class ProductServicesImpl implements ProductServices {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(ProductServicesImpl.class);
+  private static final Logger logger = LoggerFactory.getLogger(ProductServicesImpl.class);
   private final ProductRepositories repositories;
 
   private final Vertx vertx;
@@ -37,10 +37,10 @@ public class ProductServicesImpl implements ProductServices {
           productEntity -> {
             Future<JsonObject> futureCategory = sendAndReplyJsonObject(
                 productEntity.getProduct_category_id(),
-                ConstantsAddress.ADDRESS_EB_GET_PRODUCT_CATEGORY_BY_ID);
+                AddressConstants.ADDRESS_EB_GET_PRODUCT_CATEGORY_BY_ID);
             Future<JsonObject> futureProvider = sendAndReplyJsonObject(
                 productEntity.getProvider_id(),
-                ConstantsAddress.ADDRESS_EB_GET_PROVIDER_BY_ID);
+                AddressConstants.ADDRESS_EB_GET_PROVIDER_BY_ID);
 
             Future<ProductDetailDTO> productDetailDTOFuture = Future.future();
             CompositeFuture all = CompositeFuture.all(futureCategory, futureProvider);
@@ -80,8 +80,10 @@ public class ProductServicesImpl implements ProductServices {
     Future<JsonObject> jsonObjectFuture = Future.future();
     vertx.eventBus().send(address, id, reply -> {
       if (reply.succeeded()) {
-        JsonObject jsonCategory = JsonObject.mapFrom(reply.result().body());
-        jsonObjectFuture.complete(jsonCategory);
+        JsonObject jsonMessage = JsonObject.mapFrom(reply.result().body());
+        JsonObject jsonObject = (JsonObject) jsonMessage.getValue(Constants.VALUE);
+        jsonObject.remove(Constants._ID);
+        jsonObjectFuture.complete(jsonObject);
       } else {
         jsonObjectFuture.fail(reply.cause());
       }
@@ -100,10 +102,11 @@ public class ProductServicesImpl implements ProductServices {
         ProductEntity entity = res.result();
         futureProduct.complete(entity);
 
-        vertx.eventBus().send(ConstantsAddress.ADDRESS_EB_GET_PRODUCT_CATEGORY_BY_ID,
+        vertx.eventBus().send(AddressConstants.ADDRESS_EB_GET_PRODUCT_CATEGORY_BY_ID,
             entity.getProduct_category_id(), resCategory -> {
               if (resCategory.succeeded()) {
-                JsonObject jsonCategory = JsonObject.mapFrom(resCategory.result().body());
+                JsonObject jsonMessage = JsonObject.mapFrom(resCategory.result().body());
+                JsonObject jsonCategory = (JsonObject) jsonMessage.getValue(Constants.VALUE);
                 jsonCategory.remove(Constants._ID);
                 futureCategory.complete(jsonCategory);
               } else {
@@ -112,10 +115,11 @@ public class ProductServicesImpl implements ProductServices {
             });
 
         vertx.eventBus()
-            .send(ConstantsAddress.ADDRESS_EB_GET_PROVIDER_BY_ID, entity.getProvider_id(),
+            .send(AddressConstants.ADDRESS_EB_GET_PROVIDER_BY_ID, entity.getProvider_id(),
                 resProvider -> {
                   if (resProvider.succeeded()) {
-                    JsonObject jsonProvider = JsonObject.mapFrom(resProvider.result().body());
+                    JsonObject jsonMessage = JsonObject.mapFrom(resProvider.result().body());
+                    JsonObject jsonProvider = (JsonObject) jsonMessage.getValue(Constants.VALUE);
                     jsonProvider.remove(Constants._ID);
                     futureProvider.complete(jsonProvider);
                   } else {

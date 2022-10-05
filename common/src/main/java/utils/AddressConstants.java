@@ -1,6 +1,6 @@
 package utils;
 
-public class ConstantsAddress {
+public class AddressConstants {
   // eventBus address
 
 

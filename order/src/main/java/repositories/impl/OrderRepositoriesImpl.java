@@ -5,7 +5,6 @@ import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.mongo.MongoClient;
-import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.Objects;
 import org.bson.types.ObjectId;
@@ -17,7 +16,7 @@ import utils.MongoDBClient;
 
 public class OrderRepositoriesImpl implements OrderRepositories {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(OrderRepositoriesImpl.class);
+  private static final Logger logger = LoggerFactory.getLogger(OrderRepositoriesImpl.class);
   private static MongoClient mongoClient;
 
   public OrderRepositoriesImpl(Vertx vertx){
@@ -35,10 +34,10 @@ public class OrderRepositoriesImpl implements OrderRepositories {
         entity = data.stream().map(item ->
             item.mapTo(OrderEntity.class)
         ).toList();
-        LOGGER.info("getOrders:{}", entity);
+        logger.info("getOrders:{}", entity);
         future.complete(entity);
       } else {
-        LOGGER.error("getOrders fail");
+        logger.error("getOrders fail");
         future.fail(res.cause());
       }
     });
@@ -53,10 +52,10 @@ public class OrderRepositoriesImpl implements OrderRepositories {
         res -> {
           if (res.succeeded()) {
             OrderEntity orderEntity = res.result().mapTo(OrderEntity.class);
-            LOGGER.info("findOrderById:{}", orderEntity);
+            logger.info("findOrderById:{}", orderEntity);
             future.complete(orderEntity);
           } else {
-            LOGGER.error("findOrderById fail");
+            logger.error("findOrderById fail");
             future.fail(res.cause());
           }
         });
@@ -74,10 +73,10 @@ public class OrderRepositoriesImpl implements OrderRepositories {
     mongoClient.insert(Constants.COLLECTION_ORDER, query, event -> {
       if (event.succeeded()) {
         future.complete(orderEntity.getId());
-        LOGGER.info("insertOrder:{}", query);
+        logger.info("insertOrder:{}", query);
       } else {
         future.fail(event.cause());
-        LOGGER.info(Constants.MESSAGE_INSERT_FAIL + " insertOrder:{}", query);
+        logger.info(Constants.MESSAGE_INSERT_FAIL + " insertOrder:{}", query);
       }
     });
 
@@ -95,10 +94,10 @@ public class OrderRepositoriesImpl implements OrderRepositories {
     mongoClient.updateCollection(Constants.COLLECTION_ORDER, query, jsonQueryUpdate, event -> {
       if (event.succeeded()) {
         future.complete();
-        LOGGER.info("updateOrder:{}", query);
+        logger.info("updateOrder:{}", query);
       } else {
         future.fail(event.cause());
-        LOGGER.info(Constants.MESSAGE_UPDATE_FAIL + " updateOrder:{}", query);
+        logger.info(Constants.MESSAGE_UPDATE_FAIL + " updateOrder:{}", query);
       }
     });
 
@@ -111,10 +110,10 @@ public class OrderRepositoriesImpl implements OrderRepositories {
     mongoClient.findOneAndDelete(Constants.COLLECTION_ORDER,new JsonObject().put(Constants._ID,id),event -> {
       if (event.succeeded()) {
         future.complete();
-        LOGGER.info("deleteOrder:{}", id);
+        logger.info("deleteOrder:{}", id);
       } else {
         future.fail(event.cause());
-        LOGGER.info(Constants.MESSAGE_DELETE_FAIL + " deleteOrder:{}", id);
+        logger.info(Constants.MESSAGE_DELETE_FAIL + " deleteOrder:{}", id);
       }
     });
 

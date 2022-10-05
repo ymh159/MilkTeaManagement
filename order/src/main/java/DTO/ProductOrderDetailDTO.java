@@ -19,6 +19,6 @@ public class ProductOrderDetailDTO {
    private String customer_name;
    private String phone;
    private List<ProductOrderDTO> product_order;
-   private int total_value;
+   private int total_quantity;
    private int total_price;
 }

@@ -8,6 +8,6 @@ import lombok.Data;
 public class ProductOrderDTO {
     private String product_id;
     private String name;
-    private int value;
+    private int quantity;
     private int price;
 }

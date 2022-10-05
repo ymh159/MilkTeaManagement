@@ -1,5 +1,6 @@
 package repositories.impl;
 
+import com.mongodb.MongoCursorNotFoundException;
 import entity.UserEntity;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
@@ -16,7 +17,7 @@ import utils.MongoDBClient;
 
 public class UserRepositoriesImpl implements UserRepositories {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(UserRepositoriesImpl.class);
+  private static final Logger logger = LoggerFactory.getLogger(UserRepositoriesImpl.class);
   private static MongoClient mongoClient;
 
   public UserRepositoriesImpl(Vertx vertx) {
@@ -34,10 +35,10 @@ public class UserRepositoriesImpl implements UserRepositories {
         entity = data.stream().map(item ->
             item.mapTo(UserEntity.class)
         ).toList();
-        LOGGER.info("getUsers:{}", entity);
+        logger.info("getUsers:{}", entity);
         future.complete(entity);
       } else {
-        LOGGER.error("getUsers fail");
+        logger.error("getUsers fail");
         future.fail(res.cause());
       }
     });
@@ -47,15 +48,19 @@ public class UserRepositoriesImpl implements UserRepositories {
   @Override
   public Future<UserEntity> findUserById(String id) {
     Future<UserEntity> future = Future.future();
-
     mongoClient.findOne(Constants.COLLECTION_USER, new JsonObject().put(Constants._ID, id), null,
         res -> {
           if (res.succeeded()) {
-            UserEntity userEntity = res.result().mapTo(UserEntity.class);
-            LOGGER.info("findUserById:{}", userEntity);
-            future.complete(userEntity);
+            if (res.result() != null) {
+              UserEntity userEntity = res.result().mapTo(UserEntity.class);
+              logger.info("findUserById:{}", userEntity);
+              future.complete(userEntity);
+            } else {
+              logger.info("Find not found user_id:{}", id);
+              future.fail(new NullPointerException("Find not found user_id:" + id));
+            }
           } else {
-            LOGGER.error("findUserById fail");
+            logger.info("findUserById fail");
             future.fail(res.cause());
           }
         });
@@ -71,10 +76,10 @@ public class UserRepositoriesImpl implements UserRepositories {
     mongoClient.insert(Constants.COLLECTION_USER, query, event -> {
       if (event.succeeded()) {
         future.complete();
-        LOGGER.info("insertUser:{}", query);
+        logger.info("insertUser:{}", query);
       } else {
         future.fail(event.cause());
-        LOGGER.info(Constants.MESSAGE_INSERT_FAIL + " query:{}", query);
+        logger.info(Constants.MESSAGE_INSERT_FAIL + " query:{}", query);
       }
     });
 
@@ -87,15 +92,18 @@ public class UserRepositoriesImpl implements UserRepositories {
     JsonObject jsonUpdate = JsonObject.mapFrom(userEntity);
     JsonObject query = new JsonObject().put(Constants._ID, id);
     jsonUpdate.getMap().values().removeIf(Objects::isNull);
-    JsonObject jsonQueryUpdate = new JsonObject().put(Constants.DOCUMENT_SET,jsonUpdate);
-
+    JsonObject jsonQueryUpdate = new JsonObject().put(Constants.DOCUMENT_SET, jsonUpdate);
     mongoClient.updateCollection(Constants.COLLECTION_USER, query, jsonQueryUpdate, event -> {
       if (event.succeeded()) {
-        future.complete();
-        LOGGER.info("updateUser:{}", query);
+        if (event.result().getDocMatched() > 0) {
+          future.complete();
+          logger.info("updateUser:{}", query);
+        } else {
+          future.fail(new IllegalArgumentException("Update user fail. Find user not found"));
+        }
       } else {
         future.fail(event.cause());
-        LOGGER.info(Constants.MESSAGE_UPDATE_FAIL + " updateUser:{}", query);
+        logger.info(Constants.MESSAGE_UPDATE_FAIL + " updateUser:{}", query);
       }
     });
 
@@ -109,10 +117,10 @@ public class UserRepositoriesImpl implements UserRepositories {
         event -> {
           if (event.succeeded()) {
             future.complete();
-            LOGGER.info("deleteUser:{}", id);
+            logger.info("deleteUser:{}", id);
           } else {
             future.fail(event.cause());
-            LOGGER.info(Constants.MESSAGE_DELETE_FAIL + " deleteUser:{}", id);
+            logger.info(Constants.MESSAGE_DELETE_FAIL + " deleteUser:{}", id);
           }
         });
     return future;

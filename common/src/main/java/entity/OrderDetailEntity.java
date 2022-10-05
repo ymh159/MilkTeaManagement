@@ -18,6 +18,6 @@ public class OrderDetailEntity {
   private String order_id;
   private String product_id;
   private String name;
-  private int value;
+  private int quantity;
   private int price;
 }

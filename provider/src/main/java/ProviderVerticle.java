@@ -2,21 +2,19 @@ import entity.ProviderEntity;
 import entity.TypeValueReply;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.eventbus.EventBus;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import repositories.ProviderRepositories;
 import repositories.impl.ProviderRepositoriesImpl;
 import utils.Constants;
-import utils.ConstantsAddress;
+import utils.AddressConstants;
 import utils.ReplyMessageEB;
 
 public class ProviderVerticle extends AbstractVerticle {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(ProviderVerticle.class);
+  private static final Logger logger = LoggerFactory.getLogger(ProviderVerticle.class);
 
   @Override
   public void start() throws Exception {
@@ -25,9 +23,9 @@ public class ProviderVerticle extends AbstractVerticle {
     ReplyMessageEB replyMessageEB = new ReplyMessageEB();
 
     // get provider by id
-    eb.consumer(ConstantsAddress.ADDRESS_EB_GET_PROVIDER_BY_ID, message -> {
-      LOGGER.info(Constants.LOGGER_ADDRESS_AND_MESSAGE,
-          ConstantsAddress.ADDRESS_EB_GET_PROVIDER_BY_ID,
+    eb.consumer(AddressConstants.ADDRESS_EB_GET_PROVIDER_BY_ID, message -> {
+      logger.info(Constants.LOGGER_ADDRESS_AND_MESSAGE,
+          AddressConstants.ADDRESS_EB_GET_PROVIDER_BY_ID,
           message.body());
       providerRepositories.findProviderById(message.body().toString()).setHandler(res -> {
         replyMessageEB.replyMessage(message, res, TypeValueReply.JSON_OBJECT);
@@ -35,8 +33,8 @@ public class ProviderVerticle extends AbstractVerticle {
     });
 
     // get all provider
-    eb.consumer(ConstantsAddress.ADDRESS_EB_GET_PROVIDER, message -> {
-      LOGGER.info(Constants.LOGGER_ADDRESS_AND_MESSAGE, ConstantsAddress.ADDRESS_EB_GET_PROVIDER,
+    eb.consumer(AddressConstants.ADDRESS_EB_GET_PROVIDER, message -> {
+      logger.info(Constants.LOGGER_ADDRESS_AND_MESSAGE, AddressConstants.ADDRESS_EB_GET_PROVIDER,
           message.body());
       providerRepositories.getProviders().setHandler(res -> {
         replyMessageEB.replyMessage(message, res, TypeValueReply.JSON_ARRAY);
@@ -44,8 +42,8 @@ public class ProviderVerticle extends AbstractVerticle {
     });
 
     // insert provider
-    eb.consumer(ConstantsAddress.ADDRESS_EB_INSERT_PROVIDER, message -> {
-      LOGGER.info(Constants.LOGGER_ADDRESS_AND_MESSAGE, ConstantsAddress.ADDRESS_EB_INSERT_PROVIDER,
+    eb.consumer(AddressConstants.ADDRESS_EB_INSERT_PROVIDER, message -> {
+      logger.info(Constants.LOGGER_ADDRESS_AND_MESSAGE, AddressConstants.ADDRESS_EB_INSERT_PROVIDER,
           message.body());
       JsonObject json = JsonObject.mapFrom(message.body());
       ProviderEntity providerEntity = json.mapTo(ProviderEntity.class);
@@ -56,8 +54,8 @@ public class ProviderVerticle extends AbstractVerticle {
     });
 
     // update provider
-    eb.consumer(ConstantsAddress.ADDRESS_EB_UPDATE_PROVIDER, message -> {
-      LOGGER.info(Constants.LOGGER_ADDRESS_AND_MESSAGE, ConstantsAddress.ADDRESS_EB_UPDATE_PROVIDER,
+    eb.consumer(AddressConstants.ADDRESS_EB_UPDATE_PROVIDER, message -> {
+      logger.info(Constants.LOGGER_ADDRESS_AND_MESSAGE, AddressConstants.ADDRESS_EB_UPDATE_PROVIDER,
           message.body());
       JsonObject json = JsonObject.mapFrom(message.body());
       JsonObject jsonUpdate = JsonObject.mapFrom(json.getValue(Constants.JSON_UPDATE));
@@ -70,8 +68,8 @@ public class ProviderVerticle extends AbstractVerticle {
     });
 
     // delete provider
-    eb.consumer(ConstantsAddress.ADDRESS_EB_DELETE_PROVIDER, message -> {
-      LOGGER.info(Constants.LOGGER_ADDRESS_AND_MESSAGE, ConstantsAddress.ADDRESS_EB_DELETE_PROVIDER,
+    eb.consumer(AddressConstants.ADDRESS_EB_DELETE_PROVIDER, message -> {
+      logger.info(Constants.LOGGER_ADDRESS_AND_MESSAGE, AddressConstants.ADDRESS_EB_DELETE_PROVIDER,
           message.body());
       providerRepositories.deleteProvider(message.body().toString()).setHandler(res -> {
         replyMessageEB.replyMessage(message, res, TypeValueReply.JSON_OBJECT,
