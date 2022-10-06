@@ -2,6 +2,7 @@ import entity.ProductEntity;
 import entity.TypeValueReply;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.eventbus.EventBus;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,9 +85,18 @@ public class ProductVerticle extends AbstractVerticle {
       logger.info(Constants.LOGGER_ADDRESS_AND_MESSAGE,
           AddressConstants.ADDRESS_EB_GET_PRODUCT_DETAIL_BY_ID,
           message.body());
-      productServices.getProductDetailByID(message.body().toString()).setHandler(res -> {
-        replyMessageEB.replyMessage(message, res, TypeValueReply.JSON_OBJECT);
+      productServices.getProductDetailByID(message.body().toString()).subscribe((res ,throwable) -> {
+        JsonObject jsonMessage = new JsonObject();
+        JsonObject jsonValue = JsonObject.mapFrom(res);
+        jsonMessage
+            .put(Constants.STATUS, Constants.PASS)
+            .put(Constants.VALUE, jsonValue);
+        logger.info("Message reply:{}",jsonMessage);
+        message.reply(jsonMessage);
       });
+//      productServices.getProductDetailByID(message.body().toString()).setHandler(res -> {
+//        replyMessageEB.replyMessage(message, res, TypeValueReply.JSON_OBJECT);
+//      });
     });
 
     // get all product detail
@@ -94,8 +104,14 @@ public class ProductVerticle extends AbstractVerticle {
       logger.info(Constants.LOGGER_ADDRESS_AND_MESSAGE,
           AddressConstants.ADDRESS_EB_GET_ALL_PRODUCT_DETAIL,
           message.body());
-      productServices.getAllProductDetail().setHandler(res -> {
-        replyMessageEB.replyMessage(message, res, TypeValueReply.JSON_ARRAY);
+      productServices.getAllProductDetail().subscribe(res -> {
+        JsonObject jsonMessage = new JsonObject();
+        JsonArray jsonValue = new JsonArray(res);
+        jsonMessage
+            .put(Constants.STATUS, Constants.PASS)
+            .put(Constants.VALUE, jsonValue);
+        logger.info("Message reply:{}",jsonMessage);
+        message.reply(jsonMessage);
       });
     });
   }

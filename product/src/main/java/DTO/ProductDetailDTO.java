@@ -15,7 +15,7 @@ public class ProductDetailDTO {
   private String brand;
   private int cost;
   private int price;
-  private int value;
+  private int quantity;
   private String description;
   private String provider_name;
   private String provider_address;

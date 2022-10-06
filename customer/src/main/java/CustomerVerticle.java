@@ -23,7 +23,8 @@ public class CustomerVerticle extends AbstractVerticle {
 
     // get customer by id
     eb.consumer(AddressConstants.ADDRESS_EB_GET_CUSTOMER_BY_ID, message -> {
-
+      logger.info(Constants.LOGGER_ADDRESS_AND_MESSAGE, AddressConstants.ADDRESS_EB_GET_CUSTOMER_BY_ID,
+          message.body());
       customerRepositories.findCustomerById(message.body().toString()).setHandler(res -> {
 
         replyMessageEB.replyMessage(message, res, TypeValueReply.JSON_OBJECT);
