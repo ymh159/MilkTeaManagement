@@ -20,5 +20,5 @@ public class ProductEntity {
   private String provider_id;
   private int cost;
   private int price;
-  private int value;
+  private int quantity;
 }

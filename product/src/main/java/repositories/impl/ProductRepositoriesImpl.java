@@ -16,7 +16,7 @@ import utils.MongoDBClient;
 
 public class ProductRepositoriesImpl implements ProductRepositories {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(ProductRepositoriesImpl.class);
+  private static final Logger logger = LoggerFactory.getLogger(ProductRepositoriesImpl.class);
   private static MongoClient mongoClient;
 
   public ProductRepositoriesImpl(Vertx vertx) {
@@ -34,10 +34,10 @@ public class ProductRepositoriesImpl implements ProductRepositories {
         entity = data.stream().map(item ->
             item.mapTo(ProductEntity.class)
         ).toList();
-        LOGGER.info("getProducts:{}", entity);
+        logger.info("getProducts:{}", entity);
         future.complete(entity);
       } else {
-        LOGGER.error("getProducts fail");
+        logger.error("getProducts fail");
         future.fail(res.cause());
       }
     });
@@ -52,14 +52,14 @@ public class ProductRepositoriesImpl implements ProductRepositories {
         res -> {
           if (res.succeeded()) {
             if(res.result()==null){
-              future.fail(new Exception("Id not fonud"));
+              future.fail(new Exception("Id_product not found"));
             }else {
               ProductEntity productEntity = res.result().mapTo(ProductEntity.class);
-              LOGGER.info("findProductById:{}", productEntity);
+              logger.info("findProductById:{}", productEntity);
               future.complete(productEntity);
             }
           } else {
-            LOGGER.error("findProductById fail");
+            logger.error("findProductById fail");
             future.fail(res.cause());
           }
         });
@@ -75,10 +75,10 @@ public class ProductRepositoriesImpl implements ProductRepositories {
     mongoClient.insert(Constants.COLLECTION_PRODUCT, query, event -> {
       if (event.succeeded()) {
         future.complete();
-        LOGGER.info("insertProduct:{}", query);
+        logger.info("insertProduct:{}", query);
       } else {
         future.fail(event.cause());
-        LOGGER.info(Constants.MESSAGE_INSERT_FAIL + " query:{}", query);
+        logger.info(Constants.MESSAGE_INSERT_FAIL + " query:{}", query);
       }
     });
 
@@ -96,10 +96,10 @@ public class ProductRepositoriesImpl implements ProductRepositories {
     mongoClient.updateCollection(Constants.COLLECTION_PRODUCT, query, jsonQueryUpdate, event -> {
       if (event.succeeded()) {
         future.complete();
-        LOGGER.info("updateProduct:{}", query);
+        logger.info("updateProduct:{}", query);
       } else {
         future.fail(event.cause());
-        LOGGER.info(Constants.MESSAGE_UPDATE_FAIL + " updateProduct:{}", query);
+        logger.info(Constants.MESSAGE_UPDATE_FAIL + " updateProduct:{}", query);
       }
     });
 
@@ -112,10 +112,10 @@ public class ProductRepositoriesImpl implements ProductRepositories {
     mongoClient.findOneAndDelete(Constants.COLLECTION_PRODUCT,new JsonObject().put(Constants._ID,id),event -> {
       if (event.succeeded()) {
         future.complete();
-        LOGGER.info("deleteProduct:{}", id);
+        logger.info("deleteProduct:{}", id);
       } else {
         future.fail(event.cause());
-        LOGGER.info(Constants.MESSAGE_DELETE_FAIL + " deleteProduct:{}", id);
+        logger.info(Constants.MESSAGE_DELETE_FAIL + " deleteProduct:{}", id);
       }
     });
     return future;

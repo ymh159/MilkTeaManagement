@@ -16,7 +16,7 @@ import utils.MongoDBClient;
 
 public class CustomerRepositoriesImpl implements CustomerRepositories {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(CustomerRepositoriesImpl.class);
+  private static final Logger logger = LoggerFactory.getLogger(CustomerRepositoriesImpl.class);
   private static MongoClient mongoClient;
 
   public CustomerRepositoriesImpl(Vertx vertx){
@@ -34,10 +34,10 @@ public class CustomerRepositoriesImpl implements CustomerRepositories {
         entity = data.stream().map(item ->
             item.mapTo(CustomerEntity.class)
         ).toList();
-        LOGGER.info("getCustomers:{}", entity);
+        logger.info("getCustomers:{}", entity);
         future.complete(entity);
       } else {
-        LOGGER.error("getCustomers fail");
+        logger.error("getCustomers fail");
         future.fail(res.cause());
       }
     });
@@ -52,10 +52,10 @@ public class CustomerRepositoriesImpl implements CustomerRepositories {
         res -> {
           if (res.succeeded()) {
             CustomerEntity customerEntity = res.result().mapTo(CustomerEntity.class);
-            LOGGER.info("findCustomerById:{}", customerEntity);
+            logger.info("findCustomerById:{}", customerEntity);
             future.complete(customerEntity);
           } else {
-            LOGGER.error("findCustomerById fail");
+            logger.error("findCustomerById fail");
             future.fail(res.cause());
           }
         });
@@ -71,10 +71,10 @@ public class CustomerRepositoriesImpl implements CustomerRepositories {
     mongoClient.insert(Constants.COLLECTION_CUSTOMER, query, event -> {
       if (event.succeeded()) {
         future.complete();
-        LOGGER.info("insertCustomer:{}", query);
+        logger.info("insertCustomer:{}", query);
       } else {
         future.fail(event.cause());
-        LOGGER.info(Constants.MESSAGE_INSERT_FAIL + " query:{}", query);
+        logger.info(Constants.MESSAGE_INSERT_FAIL + " query:{}", query);
       }
     });
 
@@ -92,10 +92,10 @@ public class CustomerRepositoriesImpl implements CustomerRepositories {
     mongoClient.findOneAndUpdate(Constants.COLLECTION_CUSTOMER, query, jsonQueryUpdate, event -> {
       if (event.succeeded()) {
         future.complete(event.result().mapTo(CustomerEntity.class));
-        LOGGER.info("updateCustomer:{}", query);
+        logger.info("updateCustomer:{}", query);
       } else {
         future.fail(event.cause());
-        LOGGER.info(Constants.MESSAGE_UPDATE_FAIL + " updateCustomer:{}", query);
+        logger.info(Constants.MESSAGE_UPDATE_FAIL + " updateCustomer:{}", query);
       }
     });
 
@@ -108,10 +108,10 @@ public class CustomerRepositoriesImpl implements CustomerRepositories {
     mongoClient.findOneAndDelete(Constants.COLLECTION_CUSTOMER,new JsonObject().put(Constants._ID,id),event -> {
       if (event.succeeded()) {
         future.complete();
-        LOGGER.info("deleteCustomer:{}", id);
+        logger.info("deleteCustomer:{}", id);
       } else {
         future.fail(event.cause());
-        LOGGER.info(Constants.MESSAGE_DELETE_FAIL + " deleteCustomer:{}", id);
+        logger.info(Constants.MESSAGE_DELETE_FAIL + " deleteCustomer:{}", id);
       }
     });
     return future;

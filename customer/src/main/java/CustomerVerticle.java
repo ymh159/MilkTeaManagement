@@ -7,13 +7,13 @@ import org.slf4j.LoggerFactory;
 import repositories.CustomerRepositories;
 import repositories.impl.CustomerRepositoriesImpl;
 import utils.Constants;
-import utils.ConstantsAddress;
+import utils.AddressConstants;
 import utils.ReplyMessageEB;
 import entity.TypeValueReply;
 
 public class CustomerVerticle extends AbstractVerticle {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(CustomerVerticle.class);
+  private static final Logger logger = LoggerFactory.getLogger(CustomerVerticle.class);
 
   @Override
   public void start() {
@@ -22,21 +22,17 @@ public class CustomerVerticle extends AbstractVerticle {
     ReplyMessageEB replyMessageEB =new ReplyMessageEB();
 
     // get customer by id
-    eb.consumer(ConstantsAddress.ADDRESS_EB_GET_CUSTOMER_BY_ID, message -> {
-      LOGGER.info(Constants.LOGGER_ADDRESS_AND_MESSAGE,
-          ConstantsAddress.ADDRESS_EB_GET_CUSTOMER_BY_ID,
-          message.body());
+    eb.consumer(AddressConstants.ADDRESS_EB_GET_CUSTOMER_BY_ID, message -> {
+
       customerRepositories.findCustomerById(message.body().toString()).setHandler(res -> {
-        CustomerEntity customerEntity = res.result();
-        JsonObject jsonValue = JsonObject.mapFrom(customerEntity);
 
         replyMessageEB.replyMessage(message, res, TypeValueReply.JSON_OBJECT);
       });
     });
 
     // get all customer
-    eb.consumer(ConstantsAddress.ADDRESS_EB_GET_CUSTOMER, message -> {
-      LOGGER.info(Constants.LOGGER_ADDRESS_AND_MESSAGE, ConstantsAddress.ADDRESS_EB_GET_CUSTOMER,
+    eb.consumer(AddressConstants.ADDRESS_EB_GET_CUSTOMER, message -> {
+      logger.info(Constants.LOGGER_ADDRESS_AND_MESSAGE, AddressConstants.ADDRESS_EB_GET_CUSTOMER,
           message.body());
       customerRepositories.getCustomers().setHandler(res -> {
         replyMessageEB.replyMessage(message,res,TypeValueReply.JSON_ARRAY);
@@ -44,8 +40,8 @@ public class CustomerVerticle extends AbstractVerticle {
     });
 
     // insert customer
-    eb.consumer(ConstantsAddress.ADDRESS_EB_INSERT_CUSTOMER, message -> {
-      LOGGER.info(Constants.LOGGER_ADDRESS_AND_MESSAGE, ConstantsAddress.ADDRESS_EB_INSERT_CUSTOMER,
+    eb.consumer(AddressConstants.ADDRESS_EB_INSERT_CUSTOMER, message -> {
+      logger.info(Constants.LOGGER_ADDRESS_AND_MESSAGE, AddressConstants.ADDRESS_EB_INSERT_CUSTOMER,
           message.body());
       JsonObject json = JsonObject.mapFrom(message.body());
       CustomerEntity customerEntity = json.mapTo(CustomerEntity.class);
@@ -55,8 +51,8 @@ public class CustomerVerticle extends AbstractVerticle {
     });
 
     // update customer
-    eb.consumer(ConstantsAddress.ADDRESS_EB_UPDATE_CUSTOMER, message -> {
-      LOGGER.info(Constants.LOGGER_ADDRESS_AND_MESSAGE, ConstantsAddress.ADDRESS_EB_UPDATE_CUSTOMER,
+    eb.consumer(AddressConstants.ADDRESS_EB_UPDATE_CUSTOMER, message -> {
+      logger.info(Constants.LOGGER_ADDRESS_AND_MESSAGE, AddressConstants.ADDRESS_EB_UPDATE_CUSTOMER,
           message.body());
       JsonObject json = JsonObject.mapFrom(message.body());
       JsonObject jsonUpdate = JsonObject.mapFrom(json.getValue(Constants.JSON_UPDATE));
@@ -68,8 +64,8 @@ public class CustomerVerticle extends AbstractVerticle {
     });
 
     // delete customer
-    eb.consumer(ConstantsAddress.ADDRESS_EB_DELETE_CUSTOMER, message -> {
-      LOGGER.info(Constants.LOGGER_ADDRESS_AND_MESSAGE, ConstantsAddress.ADDRESS_EB_DELETE_CUSTOMER,
+    eb.consumer(AddressConstants.ADDRESS_EB_DELETE_CUSTOMER, message -> {
+      logger.info(Constants.LOGGER_ADDRESS_AND_MESSAGE, AddressConstants.ADDRESS_EB_DELETE_CUSTOMER,
           message.body());
       customerRepositories.deleteCustomer(message.body().toString()).setHandler(res -> {
         replyMessageEB.replyMessage(message, res, TypeValueReply.JSON_OBJECT,Constants.MESSAGE_DELETE_SUCCESS);

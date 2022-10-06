@@ -16,7 +16,7 @@ import utils.MongoDBClient;
 
 public class ProductCategoryRepositoriesImpl implements ProductCategoryRepositories {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(ProductCategoryRepositoriesImpl.class);
+  private static final Logger logger = LoggerFactory.getLogger(ProductCategoryRepositoriesImpl.class);
   private static MongoClient mongoClient;
 
   public ProductCategoryRepositoriesImpl(Vertx vertx) {
@@ -34,10 +34,10 @@ public class ProductCategoryRepositoriesImpl implements ProductCategoryRepositor
         entity = data.stream().map(item ->
             item.mapTo(ProductCategoryEntity.class)
         ).toList();
-        LOGGER.info("getProductCategorys:{}", entity);
+        logger.info("getProductCategorys:{}", entity);
         future.complete(entity);
       } else {
-        LOGGER.error("getProductCategorys fail");
+        logger.error("getProductCategorys fail");
         future.fail(res.cause());
       }
     });
@@ -52,10 +52,10 @@ public class ProductCategoryRepositoriesImpl implements ProductCategoryRepositor
         res -> {
           if (res.succeeded()) {
             ProductCategoryEntity productCategoryEntity = res.result().mapTo(ProductCategoryEntity.class);
-            LOGGER.info("findProductCategoryById:{}", productCategoryEntity);
+            logger.info("findProductCategoryById:{}", productCategoryEntity);
             future.complete(productCategoryEntity);
           } else {
-            LOGGER.error("findProductCategoryById fail");
+            logger.error("findProductCategoryById fail");
             future.fail(res.cause());
           }
         });
@@ -71,10 +71,10 @@ public class ProductCategoryRepositoriesImpl implements ProductCategoryRepositor
     mongoClient.insert(Constants.COLLECTION_PRODUCT_CATEGORY, query, event -> {
       if (event.succeeded()) {
         future.complete();
-        LOGGER.info("insertProductCategory:{}", query);
+        logger.info("insertProductCategory:{}", query);
       } else {
         future.fail(event.cause());
-        LOGGER.info(Constants.MESSAGE_INSERT_FAIL + " query:{}", query);
+        logger.info(Constants.MESSAGE_INSERT_FAIL + " query:{}", query);
       }
     });
 
@@ -92,10 +92,10 @@ public class ProductCategoryRepositoriesImpl implements ProductCategoryRepositor
     mongoClient.updateCollection(Constants.COLLECTION_PRODUCT_CATEGORY, query, jsonQueryUpdate, event -> {
       if (event.succeeded()) {
         future.complete();
-        LOGGER.info("updateProductCategory:{}", query);
+        logger.info("updateProductCategory:{}", query);
       } else {
         future.fail(event.cause());
-        LOGGER.info(Constants.MESSAGE_UPDATE_FAIL + " updateProductCategory:{}", query);
+        logger.info(Constants.MESSAGE_UPDATE_FAIL + " updateProductCategory:{}", query);
       }
     });
 
@@ -108,10 +108,10 @@ public class ProductCategoryRepositoriesImpl implements ProductCategoryRepositor
     mongoClient.findOneAndDelete(Constants.COLLECTION_PRODUCT_CATEGORY,new JsonObject().put(Constants._ID,id),event -> {
       if (event.succeeded()) {
         future.complete();
-        LOGGER.info("deleteProductCategory:{}", id);
+        logger.info("deleteProductCategory:{}", id);
       } else {
         future.fail(event.cause());
-        LOGGER.info(Constants.MESSAGE_DELETE_FAIL + " deleteProductCategory:{}", id);
+        logger.info(Constants.MESSAGE_DELETE_FAIL + " deleteProductCategory:{}", id);
       }
     });
     return future;

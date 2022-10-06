@@ -16,7 +16,7 @@ import utils.MongoDBClient;
 
 public class ProviderRepositoriesImpl implements ProviderRepositories {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(ProviderRepositoriesImpl.class);
+  private static final Logger logger = LoggerFactory.getLogger(ProviderRepositoriesImpl.class);
   private static MongoClient mongoClient;
 
   public ProviderRepositoriesImpl(Vertx vertx) {
@@ -34,10 +34,10 @@ public class ProviderRepositoriesImpl implements ProviderRepositories {
         entity = data.stream().map(item ->
             item.mapTo(ProviderEntity.class)
         ).toList();
-        LOGGER.info("getProviders:{}", entity);
+        logger.info("getProviders:{}", entity);
         future.complete(entity);
       } else {
-        LOGGER.error("getProviders fail");
+        logger.error("getProviders fail");
         future.fail(res.cause());
       }
     });
@@ -48,14 +48,15 @@ public class ProviderRepositoriesImpl implements ProviderRepositories {
   public Future<ProviderEntity> findProviderById(String id) {
     Future<ProviderEntity> future = Future.future();
 
-    mongoClient.findOne(Constants.COLLECTION_PROVIDER, new JsonObject().put(Constants._ID, id), null,
+    mongoClient.findOne(Constants.COLLECTION_PROVIDER, new JsonObject().put(Constants._ID, id),
+        null,
         res -> {
           if (res.succeeded()) {
             ProviderEntity providerEntity = res.result().mapTo(ProviderEntity.class);
-            LOGGER.info("findProviderById:{}", providerEntity);
+            logger.info("findProviderById:{}", providerEntity);
             future.complete(providerEntity);
           } else {
-            LOGGER.error("findProviderById fail");
+            logger.error("findProviderById fail");
             future.fail(res.cause());
           }
         });
@@ -71,10 +72,10 @@ public class ProviderRepositoriesImpl implements ProviderRepositories {
     mongoClient.insert(Constants.COLLECTION_PROVIDER, query, event -> {
       if (event.succeeded()) {
         future.complete();
-        LOGGER.info("insertProvider:{}", query);
+        logger.info("insertProvider:{}", query);
       } else {
         future.fail(event.cause());
-        LOGGER.info(Constants.MESSAGE_INSERT_FAIL + " query:{}", query);
+        logger.info(Constants.MESSAGE_INSERT_FAIL + " query:{}", query);
       }
     });
 
@@ -85,17 +86,17 @@ public class ProviderRepositoriesImpl implements ProviderRepositories {
   public Future<Void> updateProvider(String id, ProviderEntity providerEntity) {
     Future<Void> future = Future.future();
     JsonObject jsonUpdate = JsonObject.mapFrom(providerEntity);
-    JsonObject query = new JsonObject().put(Constants._ID,id);
+    JsonObject query = new JsonObject().put(Constants._ID, id);
     jsonUpdate.getMap().values().removeIf(Objects::isNull);
-    JsonObject jsonQueryUpdate = new JsonObject().put(Constants.DOCUMENT_SET,jsonUpdate);
+    JsonObject jsonQueryUpdate = new JsonObject().put(Constants.DOCUMENT_SET, jsonUpdate);
 
     mongoClient.updateCollection(Constants.COLLECTION_PROVIDER, query, jsonQueryUpdate, event -> {
       if (event.succeeded()) {
         future.complete();
-        LOGGER.info("updateProvider:{}", query);
+        logger.info("updateProvider:{}", query);
       } else {
         future.fail(event.cause());
-        LOGGER.info(Constants.MESSAGE_UPDATE_FAIL + " updateProvider:{}", query);
+        logger.info(Constants.MESSAGE_UPDATE_FAIL + " updateProvider:{}", query);
       }
     });
 
@@ -105,15 +106,16 @@ public class ProviderRepositoriesImpl implements ProviderRepositories {
   @Override
   public Future<Void> deleteProvider(String id) {
     Future<Void> future = Future.future();
-    mongoClient.findOneAndDelete(Constants.COLLECTION_PROVIDER,new JsonObject().put(Constants._ID,id),event -> {
-      if (event.succeeded()) {
-        future.complete();
-        LOGGER.info("deleteProvider:{}", id);
-      } else {
-        future.fail(event.cause());
-        LOGGER.info(Constants.MESSAGE_DELETE_FAIL + " deleteProvider:{}", id);
-      }
-    });
+    mongoClient.findOneAndDelete(Constants.COLLECTION_PROVIDER,
+        new JsonObject().put(Constants._ID, id), event -> {
+          if (event.succeeded()) {
+            future.complete();
+            logger.info("deleteProvider:{}", id);
+          } else {
+            future.fail(event.cause());
+            logger.info(Constants.MESSAGE_DELETE_FAIL + " deleteProvider:{}", id);
+          }
+        });
     return future;
   }
 }

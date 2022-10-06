@@ -18,7 +18,7 @@ import utils.MongoDBClient;
 
 public class OrderDetailRepositoriesImpl implements OrderDetailRepositories {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(OrderDetailRepositoriesImpl.class);
+  private static final Logger logger = LoggerFactory.getLogger(OrderDetailRepositoriesImpl.class);
   private static MongoClient mongoClient;
 
   public OrderDetailRepositoriesImpl(Vertx vertx){
@@ -36,10 +36,10 @@ public class OrderDetailRepositoriesImpl implements OrderDetailRepositories {
         entity = data.stream().map(item ->
             item.mapTo(OrderDetailEntity.class)
         ).toList();
-        LOGGER.info("getOrderDetails:{}", entity);
+        logger.info("getOrderDetails:{}", entity);
         future.complete(entity);
       } else {
-        LOGGER.error("getOrderDetails fail");
+        logger.error("getOrderDetails fail");
         future.fail(res.cause());
       }
     });
@@ -55,10 +55,10 @@ public class OrderDetailRepositoriesImpl implements OrderDetailRepositories {
         res -> {
           if (res.succeeded()) {
             OrderDetailEntity orderDetailEntity = res.result().mapTo(OrderDetailEntity.class);
-            LOGGER.info("findOrderDetailById:{}", orderDetailEntity);
+            logger.info("findOrderDetailById:{}", orderDetailEntity);
             future.complete(orderDetailEntity);
           } else {
-            LOGGER.error("findOrderDetailById fail");
+            logger.error("findOrderDetailById fail");
             future.fail(res.cause());
           }
         });
@@ -74,10 +74,10 @@ public class OrderDetailRepositoriesImpl implements OrderDetailRepositories {
     mongoClient.insert(Constants.COLLECTION_ORDER_DETAIL, query, event -> {
       if (event.succeeded()) {
         future.complete();
-        LOGGER.info("insertOrderDetail:{}", query);
+        logger.info("insertOrderDetail:{}", query);
       } else {
         future.fail(event.cause());
-        LOGGER.info(Constants.MESSAGE_INSERT_FAIL + " query:{}", query);
+        logger.info(Constants.MESSAGE_INSERT_FAIL + " query:{}", query);
       }
     });
 
@@ -96,10 +96,10 @@ public class OrderDetailRepositoriesImpl implements OrderDetailRepositories {
         event -> {
           if (event.succeeded()) {
             future.complete();
-            LOGGER.info("updateOrderDetail:{}", query);
+            logger.info("updateOrderDetail:{}", query);
           } else {
             future.fail(event.cause());
-            LOGGER.info(Constants.MESSAGE_UPDATE_FAIL + " updateOrderDetail:{}", query);
+            logger.info(Constants.MESSAGE_UPDATE_FAIL + " updateOrderDetail:{}", query);
           }
         });
 
@@ -114,10 +114,10 @@ public class OrderDetailRepositoriesImpl implements OrderDetailRepositories {
         event -> {
           if (event.succeeded()) {
             future.complete();
-            LOGGER.info("deleteOrderDetail:{}", id);
+            logger.info("deleteOrderDetail:{}", id);
           } else {
             future.fail(event.cause());
-            LOGGER.info(Constants.MESSAGE_DELETE_FAIL + " deleteOrderDetail:{}", id);
+            logger.info(Constants.MESSAGE_DELETE_FAIL + " deleteOrderDetail:{}", id);
           }
         });
     return future;

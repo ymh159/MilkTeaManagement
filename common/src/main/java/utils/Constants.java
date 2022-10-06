@@ -31,7 +31,7 @@ public class Constants {
   public static final String ORDER_ID = "order_id";
   public static final String USER_ID = "user_id";
   public static final String CUSTOMER_ID = "customer_id";
-  public static final String TOTAL_VALUE = "total_value";
+  public static final String TOTAL_VALUE = "total_quantity";
   public static final String TOTAL_PRICE = "total_price";
 
 

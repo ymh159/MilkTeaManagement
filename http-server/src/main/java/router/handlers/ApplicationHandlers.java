@@ -1,14 +1,13 @@
 package router.handlers;
 
 import io.vertx.core.Vertx;
-import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ultils.SendMessageAndReponse;
 import utils.Constants;
-import utils.ConstantsAddress;
+import utils.AddressConstants;
 
 public class ApplicationHandlers {
 
@@ -20,7 +19,7 @@ public class ApplicationHandlers {
     sendMessageAndReponse = new SendMessageAndReponse(vertx);
   }
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationHandlers.class);
+  private static final Logger logger = LoggerFactory.getLogger(ApplicationHandlers.class);
 
   public void customerHandler(RoutingContext routingContext) {
     String paramId = routingContext.request().getParam(Constants.ID);
@@ -32,25 +31,25 @@ public class ApplicationHandlers {
         case GET -> {
           if (paramId != null && paramId != Constants.BLANK) {
             message = paramId;
-            addressEvent = ConstantsAddress.ADDRESS_EB_GET_CUSTOMER_BY_ID;
+            addressEvent = AddressConstants.ADDRESS_EB_GET_CUSTOMER_BY_ID;
           } else {
-            addressEvent = ConstantsAddress.ADDRESS_EB_GET_CUSTOMER;
+            addressEvent = AddressConstants.ADDRESS_EB_GET_CUSTOMER;
           }
         }
         case POST -> {
           message = handler.toJsonObject();
-          addressEvent = ConstantsAddress.ADDRESS_EB_INSERT_CUSTOMER;
+          addressEvent = AddressConstants.ADDRESS_EB_INSERT_CUSTOMER;
         }
         case PATCH -> {
           JsonObject jsonObject = new JsonObject();
           jsonObject.put(Constants._ID, paramId);
           jsonObject.put(Constants.JSON_UPDATE, handler.toJsonObject());
           message = jsonObject;
-          addressEvent = ConstantsAddress.ADDRESS_EB_UPDATE_CUSTOMER;
+          addressEvent = AddressConstants.ADDRESS_EB_UPDATE_CUSTOMER;
         }
         case DELETE -> {
           message = paramId;
-          addressEvent = ConstantsAddress.ADDRESS_EB_DELETE_CUSTOMER;
+          addressEvent = AddressConstants.ADDRESS_EB_DELETE_CUSTOMER;
         }
       }
       sendMessageAndReponse.send(routingContext, addressEvent, message);
@@ -67,25 +66,25 @@ public class ApplicationHandlers {
         case GET -> {
           if (paramId != null && paramId != Constants.BLANK) {
             message = paramId;
-            addressEvent = ConstantsAddress.ADDRESS_EB_GET_ORDER_DETAIL_BY_ID;
+            addressEvent = AddressConstants.ADDRESS_EB_GET_ORDER_DETAIL_BY_ID;
           } else {
-            addressEvent = ConstantsAddress.ADDRESS_EB_GET_ORDER_DETAIL;
+            addressEvent = AddressConstants.ADDRESS_EB_GET_ORDER_DETAIL;
           }
         }
         case POST -> {
           message = handler.toJsonObject();
-          addressEvent = ConstantsAddress.ADDRESS_EB_INSERT_ORDER_DETAIL;
+          addressEvent = AddressConstants.ADDRESS_EB_INSERT_ORDER_DETAIL;
         }
         case PATCH -> {
           JsonObject jsonObject = new JsonObject();
           jsonObject.put(Constants._ID, paramId);
           jsonObject.put(Constants.JSON_UPDATE, handler.toJsonObject());
           message = jsonObject;
-          addressEvent = ConstantsAddress.ADDRESS_EB_UPDATE_ORDER_DETAIL;
+          addressEvent = AddressConstants.ADDRESS_EB_UPDATE_ORDER_DETAIL;
         }
         case DELETE -> {
           message = paramId;
-          addressEvent = ConstantsAddress.ADDRESS_EB_DELETE_ORDER_DETAIL;
+          addressEvent = AddressConstants.ADDRESS_EB_DELETE_ORDER_DETAIL;
         }
       }
       sendMessageAndReponse.send(routingContext, addressEvent, message);
@@ -102,25 +101,25 @@ public class ApplicationHandlers {
         case GET -> {
           if (paramId != null && paramId != Constants.BLANK) {
             message = paramId;
-            addressEvent = ConstantsAddress.ADDRESS_EB_GET_ORDER_BY_ID;
+            addressEvent = AddressConstants.ADDRESS_EB_GET_ORDER_BY_ID;
           } else {
-            addressEvent = ConstantsAddress.ADDRESS_EB_GET_ORDER;
+            addressEvent = AddressConstants.ADDRESS_EB_GET_ORDER;
           }
         }
         case POST -> {
           message = handler.toJsonObject();
-          addressEvent = ConstantsAddress.ADDRESS_EB_INSERT_ORDER;
+          addressEvent = AddressConstants.ADDRESS_EB_INSERT_ORDER;
         }
         case PATCH -> {
           JsonObject jsonObject = new JsonObject();
           jsonObject.put(Constants._ID, paramId);
           jsonObject.put(Constants.JSON_UPDATE, handler.toJsonObject());
           message = jsonObject;
-          addressEvent = ConstantsAddress.ADDRESS_EB_UPDATE_ORDER;
+          addressEvent = AddressConstants.ADDRESS_EB_UPDATE_ORDER;
         }
         case DELETE -> {
           message = paramId;
-          addressEvent = ConstantsAddress.ADDRESS_EB_DELETE_ORDER;
+          addressEvent = AddressConstants.ADDRESS_EB_DELETE_ORDER;
         }
       }
       sendMessageAndReponse.send(routingContext, addressEvent, message);
@@ -137,25 +136,25 @@ public class ApplicationHandlers {
         case GET -> {
           if (paramId != null && paramId != Constants.BLANK) {
             message = paramId;
-            addressEvent = ConstantsAddress.ADDRESS_EB_GET_PRODUCT_CATEGORY_BY_ID;
+            addressEvent = AddressConstants.ADDRESS_EB_GET_PRODUCT_CATEGORY_BY_ID;
           } else {
-            addressEvent = ConstantsAddress.ADDRESS_EB_GET_PRODUCT_CATEGORY;
+            addressEvent = AddressConstants.ADDRESS_EB_GET_PRODUCT_CATEGORY;
           }
         }
         case POST -> {
           message = handler.toJsonObject();
-          addressEvent = ConstantsAddress.ADDRESS_EB_INSERT_PRODUCT_CATEGORY;
+          addressEvent = AddressConstants.ADDRESS_EB_INSERT_PRODUCT_CATEGORY;
         }
         case PATCH -> {
           JsonObject jsonObject = new JsonObject();
           jsonObject.put(Constants._ID, paramId);
           jsonObject.put(Constants.JSON_UPDATE, handler.toJsonObject());
           message = jsonObject;
-          addressEvent = ConstantsAddress.ADDRESS_EB_UPDATE_PRODUCT_CATEGORY;
+          addressEvent = AddressConstants.ADDRESS_EB_UPDATE_PRODUCT_CATEGORY;
         }
         case DELETE -> {
           message = paramId;
-          addressEvent = ConstantsAddress.ADDRESS_EB_DELETE_PRODUCT_CATEGORY;
+          addressEvent = AddressConstants.ADDRESS_EB_DELETE_PRODUCT_CATEGORY;
         }
       }
       sendMessageAndReponse.send(routingContext, addressEvent, message);
@@ -172,25 +171,25 @@ public class ApplicationHandlers {
         case GET -> {
           if (paramId != null && paramId != Constants.BLANK) {
             message = paramId;
-            addressEvent = ConstantsAddress.ADDRESS_EB_GET_PRODUCT_BY_ID;
+            addressEvent = AddressConstants.ADDRESS_EB_GET_PRODUCT_BY_ID;
           } else {
-            addressEvent = ConstantsAddress.ADDRESS_EB_GET_PRODUCT;
+            addressEvent = AddressConstants.ADDRESS_EB_GET_PRODUCT;
           }
         }
         case POST -> {
           message = handler.toJsonObject();
-          addressEvent = ConstantsAddress.ADDRESS_EB_INSERT_PRODUCT;
+          addressEvent = AddressConstants.ADDRESS_EB_INSERT_PRODUCT;
         }
         case PATCH -> {
           JsonObject jsonObject = new JsonObject();
           jsonObject.put(Constants._ID, paramId);
           jsonObject.put(Constants.JSON_UPDATE, handler.toJsonObject());
-          message = handler.toJsonObject();
-          addressEvent = ConstantsAddress.ADDRESS_EB_UPDATE_PRODUCT;
+          message = jsonObject;
+          addressEvent = AddressConstants.ADDRESS_EB_UPDATE_PRODUCT;
         }
         case DELETE -> {
           message = paramId;
-          addressEvent = ConstantsAddress.ADDRESS_EB_DELETE_PRODUCT;
+          addressEvent = AddressConstants.ADDRESS_EB_DELETE_PRODUCT;
         }
       }
       sendMessageAndReponse.send(routingContext, addressEvent, message);
@@ -207,25 +206,25 @@ public class ApplicationHandlers {
         case GET -> {
           if (paramId != null && paramId != Constants.BLANK) {
             message = paramId;
-            addressEvent = ConstantsAddress.ADDRESS_EB_GET_PROVIDER_BY_ID;
+            addressEvent = AddressConstants.ADDRESS_EB_GET_PROVIDER_BY_ID;
           } else {
-            addressEvent = ConstantsAddress.ADDRESS_EB_GET_PROVIDER;
+            addressEvent = AddressConstants.ADDRESS_EB_GET_PROVIDER;
           }
         }
         case POST -> {
           message = handler.toJsonObject();
-          addressEvent = ConstantsAddress.ADDRESS_EB_INSERT_PROVIDER;
+          addressEvent = AddressConstants.ADDRESS_EB_INSERT_PROVIDER;
         }
         case PATCH -> {
           JsonObject jsonObject = new JsonObject();
           jsonObject.put(Constants._ID, paramId);
           jsonObject.put(Constants.JSON_UPDATE, handler.toJsonObject());
           message = jsonObject;
-          addressEvent = ConstantsAddress.ADDRESS_EB_UPDATE_PROVIDER;
+          addressEvent = AddressConstants.ADDRESS_EB_UPDATE_PROVIDER;
         }
         case DELETE -> {
           message = paramId;
-          addressEvent = ConstantsAddress.ADDRESS_EB_DELETE_PROVIDER;
+          addressEvent = AddressConstants.ADDRESS_EB_DELETE_PROVIDER;
         }
       }
       sendMessageAndReponse.send(routingContext, addressEvent, message);
@@ -242,25 +241,25 @@ public class ApplicationHandlers {
         case GET -> {
           if (paramId != null && paramId != Constants.BLANK) {
             message = paramId;
-            addressEvent = ConstantsAddress.ADDRESS_EB_GET_USER_BY_ID;
+            addressEvent = AddressConstants.ADDRESS_EB_GET_USER_BY_ID;
           } else {
-            addressEvent = ConstantsAddress.ADDRESS_EB_GET_USER;
+            addressEvent = AddressConstants.ADDRESS_EB_GET_USER;
           }
         }
         case POST -> {
           message = handler.toJsonObject();
-          addressEvent = ConstantsAddress.ADDRESS_EB_INSERT_USER;
+          addressEvent = AddressConstants.ADDRESS_EB_INSERT_USER;
         }
         case PATCH -> {
           JsonObject jsonObject = new JsonObject();
           jsonObject.put(Constants._ID, paramId);
           jsonObject.put(Constants.JSON_UPDATE, handler.toJsonObject());
           message = jsonObject;
-          addressEvent = ConstantsAddress.ADDRESS_EB_UPDATE_USER;
+          addressEvent = AddressConstants.ADDRESS_EB_UPDATE_USER;
         }
         case DELETE -> {
           message = paramId;
-          addressEvent = ConstantsAddress.ADDRESS_EB_DELETE_USER;
+          addressEvent = AddressConstants.ADDRESS_EB_DELETE_USER;
         }
       }
       sendMessageAndReponse.send(routingContext, addressEvent, message);
@@ -272,10 +271,10 @@ public class ApplicationHandlers {
     String paramId = routingContext.request().getParam(Constants.ID);
     if (paramId != null && !paramId.isEmpty()) {
       sendMessageAndReponse.send(routingContext,
-          ConstantsAddress.ADDRESS_EB_GET_PRODUCT_DETAIL_BY_ID,
+          AddressConstants.ADDRESS_EB_GET_PRODUCT_DETAIL_BY_ID,
           paramId);
     } else {
-      sendMessageAndReponse.send(routingContext, ConstantsAddress.ADDRESS_EB_GET_ALL_PRODUCT_DETAIL,
+      sendMessageAndReponse.send(routingContext, AddressConstants.ADDRESS_EB_GET_ALL_PRODUCT_DETAIL,
           null);
     }
   }
@@ -285,12 +284,12 @@ public class ApplicationHandlers {
       case GET -> {
         String id = routingContext.request().getParam(Constants.ID);
         sendMessageAndReponse.send(routingContext,
-            ConstantsAddress.ADDRESS_EB_GET_ORDER_PRODUCT_DETAIL, id);
+            AddressConstants.ADDRESS_EB_GET_ORDER_PRODUCT_DETAIL, id);
       }
       case POST -> {
         routingContext.request().bodyHandler(handler -> {
           JsonObject jsonObject = handler.toJsonObject();
-          sendMessageAndReponse.send(routingContext, ConstantsAddress.ADDRESS_EB_ORDER_PRODUCT,
+          sendMessageAndReponse.send(routingContext, AddressConstants.ADDRESS_EB_ORDER_PRODUCT,
               jsonObject);
         });
       }
@@ -299,7 +298,7 @@ public class ApplicationHandlers {
 
   public void findOrderDetailByOrderId(RoutingContext routingContext) {
     sendMessageAndReponse.send(routingContext,
-        ConstantsAddress.ADDRESS_EB_GET_ORDER_DETAIL_BY_ORDER_ID,
+        AddressConstants.ADDRESS_EB_GET_ORDER_DETAIL_BY_ORDER_ID,
         routingContext.pathParam(Constants.ORDER_ID));
   }
 
