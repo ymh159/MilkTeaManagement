@@ -28,8 +28,7 @@ public class ProductVerticle extends AbstractVerticle {
     // get product by id
     eb.consumer(AddressConstants.ADDRESS_EB_GET_PRODUCT_BY_ID, message -> {
       logger.info(Constants.LOGGER_ADDRESS_AND_MESSAGE,
-          AddressConstants.ADDRESS_EB_GET_PRODUCT_BY_ID,
-          message.body());
+          AddressConstants.ADDRESS_EB_GET_PRODUCT_BY_ID, message.body());
       productRepositories.findProductById(message.body().toString()).setHandler(res -> {
         replyMessageEB.replyMessage(message, res, TypeValueReply.JSON_OBJECT);
       });
@@ -83,34 +82,34 @@ public class ProductVerticle extends AbstractVerticle {
     // get product detail
     eb.consumer(AddressConstants.ADDRESS_EB_GET_PRODUCT_DETAIL_BY_ID, message -> {
       logger.info(Constants.LOGGER_ADDRESS_AND_MESSAGE,
-          AddressConstants.ADDRESS_EB_GET_PRODUCT_DETAIL_BY_ID,
-          message.body());
-      productServices.getProductDetailByID(message.body().toString()).subscribe((res ,throwable) -> {
-        JsonObject jsonMessage = new JsonObject();
+          AddressConstants.ADDRESS_EB_GET_PRODUCT_DETAIL_BY_ID, message.body());
+      JsonObject jsonMessage = new JsonObject();
+      productServices.getProductDetailByID(message.body().toString()).subscribe((res -> {
         JsonObject jsonValue = JsonObject.mapFrom(res);
-        jsonMessage
-            .put(Constants.STATUS, Constants.PASS)
-            .put(Constants.VALUE, jsonValue);
-        logger.info("Message reply:{}",jsonMessage);
+        jsonMessage.put(Constants.STATUS, Constants.PASS).put(Constants.VALUE, jsonValue);
+        logger.info("Message reply:{}", jsonMessage);
         message.reply(jsonMessage);
-      });
-//      productServices.getProductDetailByID(message.body().toString()).setHandler(res -> {
-//        replyMessageEB.replyMessage(message, res, TypeValueReply.JSON_OBJECT);
-//      });
+      }), (throwable -> {
+        jsonMessage.put(Constants.STATUS, Constants.FAIL)
+            .put(Constants.MESSAGE, throwable.getMessage());
+        logger.info("Message reply:{}", jsonMessage);
+        message.reply(jsonMessage);
+      }));
     });
 
     // get all product detail
     eb.consumer(AddressConstants.ADDRESS_EB_GET_ALL_PRODUCT_DETAIL, message -> {
       logger.info(Constants.LOGGER_ADDRESS_AND_MESSAGE,
-          AddressConstants.ADDRESS_EB_GET_ALL_PRODUCT_DETAIL,
-          message.body());
+          AddressConstants.ADDRESS_EB_GET_ALL_PRODUCT_DETAIL, message.body());
+      JsonObject jsonMessage = new JsonObject();
       productServices.getAllProductDetail().subscribe(res -> {
-        JsonObject jsonMessage = new JsonObject();
         JsonArray jsonValue = new JsonArray(res);
-        jsonMessage
-            .put(Constants.STATUS, Constants.PASS)
-            .put(Constants.VALUE, jsonValue);
-        logger.info("Message reply:{}",jsonMessage);
+        jsonMessage.put(Constants.STATUS, Constants.PASS).put(Constants.VALUE, jsonValue);
+        logger.info("Message reply:{}", jsonMessage);
+        message.reply(jsonMessage);
+      }, throwable -> {
+        jsonMessage.put(Constants.STATUS, Constants.FAIL).put(Constants.MESSAGE, throwable);
+        logger.info("Message reply:{}", jsonMessage);
         message.reply(jsonMessage);
       });
     });

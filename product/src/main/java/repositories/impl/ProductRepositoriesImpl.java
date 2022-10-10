@@ -1,5 +1,6 @@
 package repositories.impl;
 
+import com.mongodb.session.ClientSession;
 import entity.ProductEntity;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
@@ -71,7 +72,6 @@ public class ProductRepositoriesImpl implements ProductRepositories {
     Future<Void> future = Future.future();
     productEntity.setId(ObjectId.get().toHexString());
     JsonObject query = JsonObject.mapFrom(productEntity);
-
     mongoClient.insert(Constants.COLLECTION_PRODUCT, query, event -> {
       if (event.succeeded()) {
         future.complete();
@@ -86,16 +86,17 @@ public class ProductRepositoriesImpl implements ProductRepositories {
   }
 
   @Override
-  public Future<Void> updateProduct(String id, ProductEntity productEntity) {
-    Future<Void> future = Future.future();
+  public Future<ProductEntity> updateProduct(String id, ProductEntity productEntity) {
+    Future<ProductEntity> future = Future.future();
     JsonObject jsonUpdate = JsonObject.mapFrom(productEntity);
     JsonObject query = new JsonObject().put(Constants._ID,id);
     jsonUpdate.getMap().values().removeIf(Objects::isNull);
     JsonObject jsonQueryUpdate = new JsonObject().put(Constants.DOCUMENT_SET,jsonUpdate);
 
-    mongoClient.updateCollection(Constants.COLLECTION_PRODUCT, query, jsonQueryUpdate, event -> {
+    mongoClient.findOneAndUpdate(Constants.COLLECTION_PRODUCT, query, jsonQueryUpdate, event -> {
       if (event.succeeded()) {
-        future.complete();
+        ProductEntity entity = JsonObject.mapFrom(event.result()).mapTo(ProductEntity.class);
+        future.complete(entity);
         logger.info("updateProduct:{}", query);
       } else {
         future.fail(event.cause());
