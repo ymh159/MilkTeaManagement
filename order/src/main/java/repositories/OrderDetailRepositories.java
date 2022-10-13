@@ -1,6 +1,7 @@
 package repositories;
 
 import entity.OrderDetailEntity;
+import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Single;
 import io.vertx.core.Future;
 import java.util.List;
@@ -17,4 +18,5 @@ public interface OrderDetailRepositories {
 
   Single<OrderDetailEntity> deleteOrderDetail(String id);
   Future<List<OrderDetailEntity>> findOrderDetailByOrderId(String order_id);
+  Completable deleteOrderDetailByOrderId(String orderId);
 }

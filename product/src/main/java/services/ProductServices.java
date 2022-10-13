@@ -9,6 +9,5 @@ import java.util.List;
 public interface ProductServices {
   Single<List<ProductDetailDTO>> getAllProductDetail();
   Single<ProductDetailDTO> getProductDetailByID(String id);
-  Future<List<ProductEntity>> getAllProduct();
-  Future<ProductEntity> findProductById(String id);
+  Single<List<ProductEntity>> getAllProduct();
 }

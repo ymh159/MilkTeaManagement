@@ -1,18 +1,14 @@
 package repositories;
 
-import entity.ProviderEntity;
-import io.vertx.core.Future;
+import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Single;
 import java.util.List;
 
-public interface ProviderRepositories {
+public interface ProviderRepositories<T> {
 
-  Future<List<ProviderEntity>> getProviders();
-
-  Future<ProviderEntity> findProviderById(String id);
-
-  Future<Void> insertProvider(ProviderEntity providerEntity);
-
-  Future<Void> updateProvider(String id,ProviderEntity providerEntity);
-
-  Future<Void> deleteProvider(String id);
+  Single<List<T>> getAll();
+  Single<T> findById(String id);
+  Single<String> insert(T entity);
+  Single<T> update(String id, T entity);
+  Completable delete(String id);
 }

@@ -5,7 +5,7 @@ import io.reactivex.rxjava3.core.Single;
 
 import java.util.List;
 
-public interface UserRepositories<T> {
+public interface CRUDRepositoriesInterface<T> {
     Single<List<T>> getAll();
     Single<T> findById(String id);
     Single<String> insert(T entity);

@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 public class ReplyMessageEB {
   private static final Logger logger = LoggerFactory.getLogger(ReplyMessageEB.class);
 
-  public void replyMessage(Message<Object> message,
+  public  <T>void replyMessage(Message <T> message,
       AsyncResult<?> res, TypeValueReply typeValueReply, String stringMessage) {
     JsonObject jsonMessage = new JsonObject();
     if (res.succeeded()) {
@@ -41,8 +41,8 @@ public class ReplyMessageEB {
     }
   }
 
-  public void replyMessage(io.vertx.core.eventbus.Message<Object> message,
-      AsyncResult<?> res, TypeValueReply typeValueReply) {
+  public  <T,E>void replyMessage(Message<T> message,
+      AsyncResult<E> res, TypeValueReply typeValueReply) {
     JsonObject jsonMessage = new JsonObject();
 
     if (res.succeeded()) {
