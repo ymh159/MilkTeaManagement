@@ -1,7 +1,7 @@
 package repositories.impl;
 
 import entity.OrderDetailEntity;
-import entity.ProductEntity;
+import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.core.Single;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import repositories.OrderDetailRepositories;
@@ -146,4 +145,19 @@ public class OrderDetailRepositoriesImpl implements OrderDetailRepositories {
 
     return future;
   }
+
+  @Override
+  public Completable deleteOrderDetailByOrderId(String orderId) {
+    JsonObject query = new JsonObject().put(Constants.ORDER_ID,orderId);
+    return Completable.create(emitter -> {
+      mongoClient.removeDocuments(Constants.COLLECTION_ORDER_DETAIL, query,res -> {
+        if (res.succeeded()){
+          emitter.onComplete();
+        }else{
+          emitter.onError(res.cause());
+        }
+      });
+    });
+  }
+
 }

@@ -39,6 +39,7 @@ public class AddressConstants {
   public static final String ADDRESS_EB_UPDATE_ORDER =  "update.order";
   public static final String ADDRESS_EB_UPDATE_PRODUCT_CATEGORY =  "update.product_category";
   public static final String ADDRESS_EB_UPDATE_PRODUCT =  "update.product";
+  public static final String ADDRESS_EB_CHECK_AND_UPDATE_PRODUCT =  "check.and.update.product";
   public static final String ADDRESS_EB_UPDATE_PROVIDER =  "update.provider";
   public static final String ADDRESS_EB_UPDATE_USER =  "update.user";
 

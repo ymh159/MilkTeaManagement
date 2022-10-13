@@ -1,18 +1,13 @@
 package repositories;
 
-import entity.ProductCategoryEntity;
-import io.vertx.core.Future;
+import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Single;
 import java.util.List;
 
-public interface ProductCategoryRepositories {
-
-  Future<List<ProductCategoryEntity>> getProductCategorys();
-
-  Future<ProductCategoryEntity> findProductCategoryById(String id);
-
-  Future<Void> insertProductCategory(ProductCategoryEntity productCategoryEntity);
-
-  Future<Void> updateProductCategory(String id, ProductCategoryEntity productCategoryEntity);
-
-  Future<Void> deleteProductCategory(String id);
+public interface ProductCategoryRepositories<T> {
+  Single<List<T>> getAll();
+  Single<T> findById(String id);
+  Single<String> insert(T entity);
+  Single<T> update(String id, T entity);
+  Completable delete(String id);
 }

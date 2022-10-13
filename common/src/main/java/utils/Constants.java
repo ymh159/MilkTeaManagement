@@ -41,6 +41,8 @@ public class Constants {
   public static final String BLANK = "";
   public static final String DOCUMENT_SET = "$set";
   public static final String JSON_UPDATE = "json_update";
+  public static final String QUERY_OPERATOR_GTE = "$gte";
+
 
   // message
   public static final String MESSAGE_INSERT_SUCCESS = "Insert Success";

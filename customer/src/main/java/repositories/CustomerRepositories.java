@@ -1,18 +1,16 @@
 package repositories;
 
 import entity.CustomerEntity;
+import io.reactivex.rxjava3.core.Completable;
+import io.reactivex.rxjava3.core.Single;
 import io.vertx.core.Future;
 import java.util.List;
 
-public interface CustomerRepositories {
+public interface CustomerRepositories<T> {
 
-  Future<List<CustomerEntity>> getCustomers();
-
-  Future<CustomerEntity> findCustomerById(String id);
-
-  Future<Void> insertCustomer(CustomerEntity customerEntity);
-
-  Future<CustomerEntity> updateCustomer(String id, CustomerEntity customerEntity);
-
-  Future<Void> deleteCustomer(String id);
+  Single<List<T>> getAll();
+  Single<T> findById(String id);
+  Single<String> insert(T entity);
+  Single<T> update(String id, T entity);
+  Completable delete(String id);
 }
