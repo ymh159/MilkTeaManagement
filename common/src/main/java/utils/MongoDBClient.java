@@ -16,7 +16,8 @@ public class MongoDBClient {
     connect_string = connect_string != null ? connect_string : Constants.CONFIG_MONGO_HOST_VALUE;
     db_name = db_name != null ? db_name : Constants.CONFIG_MONGO_DB_NAME_VALUE;
 
-    JsonObject config = new JsonObject().put(Constants.CONFIG_MONGO_HOST_KEY, connect_string)
+    JsonObject config = new JsonObject()
+        .put(Constants.CONFIG_MONGO_HOST_KEY, connect_string)
         .put(Constants.CONFIG_MONGO_DB_NAME_KEY, db_name);
 
     return MongoClient.createShared(vertx, config);

@@ -1,6 +1,8 @@
 package repositories.impl;
 
 import entity.OrderDetailEntity;
+import entity.ProductEntity;
+import io.reactivex.rxjava3.core.Single;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
@@ -21,7 +23,7 @@ public class OrderDetailRepositoriesImpl implements OrderDetailRepositories {
   private static final Logger logger = LoggerFactory.getLogger(OrderDetailRepositoriesImpl.class);
   private static MongoClient mongoClient;
 
-  public OrderDetailRepositoriesImpl(Vertx vertx){
+  public OrderDetailRepositoriesImpl(Vertx vertx) {
     mongoClient = MongoDBClient.client(vertx);
   }
 
@@ -66,22 +68,20 @@ public class OrderDetailRepositoriesImpl implements OrderDetailRepositories {
   }
 
   @Override
-  public Future<Void> insertOrderDetail(OrderDetailEntity orderDetailEntity) {
-    Future<Void> future = Future.future();
-    orderDetailEntity.setId(ObjectId.get().toHexString());
-    JsonObject query = JsonObject.mapFrom(orderDetailEntity);
-
-    mongoClient.insert(Constants.COLLECTION_ORDER_DETAIL, query, event -> {
-      if (event.succeeded()) {
-        future.complete();
-        logger.info("insertOrderDetail:{}", query);
-      } else {
-        future.fail(event.cause());
-        logger.info(Constants.MESSAGE_INSERT_FAIL + " query:{}", query);
-      }
+  public Single<String> insertOrderDetail(OrderDetailEntity orderDetailEntity) {
+    return Single.create(emitter -> {
+      JsonObject query = JsonObject.mapFrom(orderDetailEntity);
+      query.getMap().values().removeIf(Objects::isNull);
+      mongoClient.insert(Constants.COLLECTION_ORDER_DETAIL, query, res -> {
+        if (res.succeeded()) {
+          logger.info("insertOrderDetail:{}", query);
+          emitter.onSuccess(res.result());
+        } else {
+          logger.info(Constants.MESSAGE_INSERT_FAIL + " query:{}", query);
+          emitter.onError(res.cause());
+        }
+      });
     });
-
-    return future;
   }
 
   @Override
@@ -107,20 +107,21 @@ public class OrderDetailRepositoriesImpl implements OrderDetailRepositories {
   }
 
   @Override
-  public Future<Void> deleteOrderDetail(String id) {
-    Future<Void> future = Future.future();
-    mongoClient.findOneAndDelete(Constants.COLLECTION_ORDER_DETAIL,
-        new JsonObject().put(Constants._ID, id),
-        event -> {
-          if (event.succeeded()) {
-            future.complete();
-            logger.info("deleteOrderDetail:{}", id);
-          } else {
-            future.fail(event.cause());
-            logger.info(Constants.MESSAGE_DELETE_FAIL + " deleteOrderDetail:{}", id);
-          }
-        });
-    return future;
+  public Single<OrderDetailEntity> deleteOrderDetail(String id) {
+
+    return Single.create(emitter -> {
+      mongoClient.findOneAndDelete(Constants.COLLECTION_ORDER_DETAIL,
+          new JsonObject().put(Constants._ID, id),
+          event -> {
+            if (event.succeeded()) {
+              logger.info("deleteOrderDetail:{}", id);
+              emitter.onSuccess(event.result().mapTo(OrderDetailEntity.class));
+            } else {
+              logger.info(Constants.MESSAGE_DELETE_FAIL + " deleteOrderDetail:{}", id);
+              emitter.onError(event.cause());
+            }
+          });
+    });
   }
 
   @Override

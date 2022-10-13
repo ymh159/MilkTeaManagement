@@ -1,6 +1,7 @@
 package router.handlers;
 
 import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 import org.slf4j.Logger;

@@ -1,11 +1,16 @@
 import DTO.OrderInfoDTO;
+import DTO.ProductOrderDTO;
 import entity.OrderDetailEntity;
 import entity.OrderEntity;
 import entity.TypeValueReply;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import repositories.OrderDetailRepositories;
@@ -17,6 +22,7 @@ import services.impl.OrderProductServicesImpl;
 import utils.Constants;
 import utils.AddressConstants;
 import utils.ReplyMessageEB;
+import utils.ReplyMessageSingle;
 
 public class OrderVerticle extends AbstractVerticle {
 
@@ -50,22 +56,76 @@ public class OrderVerticle extends AbstractVerticle {
           message.body());
       JsonObject jsonObject = JsonObject.mapFrom(message.body());
       OrderInfoDTO orderInfoDTO = jsonObject.mapTo(OrderInfoDTO.class);
-      orderProductSevices.orderProduct(orderInfoDTO).setHandler(resOrder -> {
-        JsonObject jsonMessage = new JsonObject();
-        if (resOrder.succeeded()) {
-          orderProductSevices.getOrderProductDetail(resOrder.result())
-              .setHandler(resGet -> {
-                replyMessageEB.replyMessage(message, resGet, TypeValueReply.JSON_OBJECT);
-              });
-        } else {
-          jsonMessage
-              .put(Constants.STATUS, Constants.FAIL)
-              .put(Constants.MESSAGE, resOrder.cause().getMessage());
-          message.reply(jsonMessage);
-        }
+
+      JsonObject jsonMessage = new JsonObject();
+      orderProductSevices.orderSingle(orderInfoDTO).subscribe(res -> {
+        JsonObject jsonValue = new JsonObject().put(Constants.VALUE, res);
+        jsonMessage
+            .put(Constants.STATUS, Constants.PASS)
+            .put(Constants.VALUE, jsonValue);
+        logger.info("Message reply:{}", jsonMessage);
+        message.reply(jsonMessage);
+      }, throwable -> {
+        jsonMessage
+            .put(Constants.STATUS, Constants.FAIL)
+            .put(Constants.MESSAGE, throwable.getMessage());
+        logger.info("Message reply:{}", jsonMessage);
+        message.reply(jsonMessage);
       });
+
+//      .subscribe((res, throwable) -> {
+//        JsonObject jsonMessage = new JsonObject();
+//        JsonObject jsonValue = JsonObject.mapFrom(res);
+//        if (throwable == null) {
+//          jsonMessage
+//              .put(Constants.STATUS, Constants.PASS)
+//              .put(Constants.VALUE, jsonValue);
+//          logger.info("Message reply:{}", jsonMessage);
+//          message.reply(jsonMessage);
+//        } else {
+//          jsonMessage
+//              .put(Constants.STATUS, Constants.FAIL);
+//          logger.info("Message reply:{}", throwable);
+//          message.reply(throwable);
+//        }
+//      });
     });
   }
+//      OrderInfoDTO orderInfoDTO = jsonObject.mapTo(OrderInfoDTO.class);
+//      orderProductSevices.orderSingle(orderInfoDTO).subscribe(resOrder -> {
+//        JsonObject jsonMessage = new JsonObject();
+//        if (resOrder!=null) {
+//          orderProductSevices.getOrderProductDetail(resOrder)
+//              .setHandler(resGet -> {
+//                replyMessageEB.replyMessage(message, resGet, TypeValueReply.JSON_OBJECT);
+//              });
+//        } else {
+//          jsonMessage
+//              .put(Constants.STATUS, Constants.FAIL)
+//              .put(Constants.MESSAGE,Constants.FAIL);
+//          message.reply(jsonMessage);
+//        }
+
+//    eb.consumer(AddressConstants.ADDRESS_EB_ORDER_PRODUCT, message -> {
+//      logger.info(Constants.LOGGER_ADDRESS_AND_MESSAGE, AddressConstants.ADDRESS_EB_ORDER_PRODUCT,
+//          message.body());
+//      JsonObject jsonObject = JsonObject.mapFrom(message.body());
+//      OrderInfoDTO orderInfoDTO = jsonObject.mapTo(OrderInfoDTO.class);
+//      orderProductSevices.orderProduct(orderInfoDTO).setHandler(resOrder -> {
+//        JsonObject jsonMessage = new JsonObject();
+//        if (resOrder.succeeded()) {
+//          orderProductSevices.getOrderProductDetail(resOrder.result())
+//              .setHandler(resGet -> {
+//                replyMessageEB.replyMessage(message, resGet, TypeValueReply.JSON_OBJECT);
+//              });
+//        } else {
+//          jsonMessage
+//              .put(Constants.STATUS, Constants.FAIL)
+//              .put(Constants.MESSAGE, resOrder.cause().getMessage());
+//          message.reply(jsonMessage);
+//        }
+//      });
+//    });
 
   public void eventBusOrder(Vertx vertx) {
     OrderRepositories orderRepositories = new OrderRepositoriesImpl(vertx);
@@ -119,10 +179,9 @@ public class OrderVerticle extends AbstractVerticle {
     eb.consumer(AddressConstants.ADDRESS_EB_DELETE_ORDER, message -> {
       logger.info(Constants.LOGGER_ADDRESS_AND_MESSAGE, AddressConstants.ADDRESS_EB_DELETE_ORDER,
           message.body());
-      orderRepositories.deleteOrder(message.body().toString()).setHandler(res -> {
-        replyMessageEB.replyMessage(message, res, TypeValueReply.JSON_OBJECT,
-            Constants.MESSAGE_DELETE_SUCCESS);
-      });
+      ReplyMessageSingle.replyMessage(message,
+          orderRepositories.deleteOrder(message.body().toString()),
+          Constants.MESSAGE_DELETE_SUCCESS);
     });
   }
 
@@ -168,10 +227,9 @@ public class OrderVerticle extends AbstractVerticle {
           message.body());
       JsonObject json = JsonObject.mapFrom(message.body());
       OrderDetailEntity orderDetailEntity = json.mapTo(OrderDetailEntity.class);
-      orderDetailRepositories.insertOrderDetail(orderDetailEntity).setHandler(res -> {
-        replyMessageEB.replyMessage(message, res, TypeValueReply.JSON_OBJECT,
-            Constants.MESSAGE_INSERT_SUCCESS);
-      });
+      ReplyMessageSingle.replyMessage(message,
+          orderDetailRepositories.insertOrderDetail(orderDetailEntity),
+          Constants.MESSAGE_INSERT_SUCCESS);
     });
 
     // update orderDetail
@@ -195,10 +253,9 @@ public class OrderVerticle extends AbstractVerticle {
       logger.info(Constants.LOGGER_ADDRESS_AND_MESSAGE,
           AddressConstants.ADDRESS_EB_DELETE_ORDER_DETAIL,
           message.body());
-      orderDetailRepositories.deleteOrderDetail(message.body().toString()).setHandler(res -> {
-        replyMessageEB.replyMessage(message, res, TypeValueReply.JSON_OBJECT,
-            Constants.MESSAGE_DELETE_SUCCESS);
-      });
+      ReplyMessageSingle.replyMessage(message,
+          orderDetailRepositories.deleteOrderDetail(message.body().toString()),
+          Constants.MESSAGE_DELETE_SUCCESS);
     });
   }
 }

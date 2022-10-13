@@ -12,7 +12,7 @@ public interface ProductRepositories {
 
   Future<Void> insertProduct(ProductEntity productEntity);
 
-  Future<Void> updateProduct(String id, ProductEntity productEntity);
+  Future<ProductEntity> updateProduct(String id, ProductEntity productEntity);
 
   Future<Void> deleteProduct(String id);
 }

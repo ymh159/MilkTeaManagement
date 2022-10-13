@@ -1,6 +1,8 @@
 package repositories.impl;
 
 import entity.OrderEntity;
+import entity.ProductEntity;
+import io.reactivex.rxjava3.core.Single;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
@@ -66,13 +68,12 @@ public class OrderRepositoriesImpl implements OrderRepositories {
   @Override
   public Future<String> insertOrder(OrderEntity orderEntity) {
     Future<String> future = Future.future();
-    orderEntity.setId(ObjectId.get().toHexString());
     JsonObject query = JsonObject.mapFrom(orderEntity);
-    //query.put(Constants.DATE_ORDER, new JsonObject().put("$date",query.getValue(Constants.DATE_ORDER)));
+    query.getMap().values().removeIf(Objects::isNull);
 
     mongoClient.insert(Constants.COLLECTION_ORDER, query, event -> {
       if (event.succeeded()) {
-        future.complete(orderEntity.getId());
+        future.complete(event.result());
         logger.info("insertOrder:{}", query);
       } else {
         future.fail(event.cause());
@@ -105,18 +106,19 @@ public class OrderRepositoriesImpl implements OrderRepositories {
   }
 
   @Override
-  public Future<Void> deleteOrder(String id) {
-    Future<Void> future = Future.future();
-    mongoClient.findOneAndDelete(Constants.COLLECTION_ORDER,new JsonObject().put(Constants._ID,id),event -> {
-      if (event.succeeded()) {
-        future.complete();
-        logger.info("deleteOrder:{}", id);
-      } else {
-        future.fail(event.cause());
-        logger.info(Constants.MESSAGE_DELETE_FAIL + " deleteOrder:{}", id);
-      }
+  public Single<ProductEntity> deleteOrder(String id) {
+    Single<ProductEntity> single = Single.create(emitter -> {
+      mongoClient.findOneAndDelete(Constants.COLLECTION_ORDER,new JsonObject().put(Constants._ID,id),event -> {
+        if (event.succeeded()) {
+          ProductEntity productEntity = JsonObject.mapFrom(event.result()).mapTo(ProductEntity.class);
+          emitter.onSuccess(productEntity);
+          logger.info("deleteOrder:{}", id);
+        } else {
+          emitter.onError(event.cause());
+          logger.info(Constants.MESSAGE_DELETE_FAIL + " deleteOrder:{}", id);
+        }
+      });
     });
-
-    return future;
+    return single;
   }
 }
